@@ -1,32 +1,33 @@
 {% extends 'base.html' %}
 {% block content %}
+<div class="page-heading"><div><p class="eyebrow">STOCK MANAGEMENT</p><h1>Inventory</h1><p class="subtitle">A clear view of your supplies, quantities, and expiration dates.</p></div><button id="add-item">{{ icon('plus', 18) }} Add item</button></div>
+<div class="metrics" aria-label="Inventory summary">
+  {% for id, label, glyph, note in [('total', 'Products tracked', 'box', 'All inventory records'), ('available', 'In stock', 'check', 'Products with stock on hand'), ('expiring', 'Expiring soon', 'clock', 'In stock · next 7 days'), ('out', 'Out of stock', 'alert', 'Products with zero quantity')] %}
+  <div class="metric-card"><span class="metric-label">{{ label }} {{ icon(glyph) }}</span><strong id="count-{{ id }}">—</strong><span class="metric-note">{{ note }}</span></div>
+  {% endfor %}
+</div>
 <section class="panel" id="inventory-page" data-api="{{ url_for('inventory.list_items') }}" data-delete="{{ url_for('inventory.delete_items') }}">
-  <h1>Inventory</h1>
-  <div class="toolbar">
-    <button id="add-item">Add item</button>
-    <button id="edit-item" class="secondary" disabled>Edit selected</button>
-    <button id="delete-items" class="danger" disabled>Delete selected</button>
-    <label>Search <input id="inventory-search" type="search" placeholder="Name, category or ID"></label>
+  <div class="panel-heading"><div><h2>All products</h2><p>Manage your food and hygiene supplies.</p></div><a class="text-link" href="{{ url_for('reports.index') }}">{{ icon('download', 16) }} Export reports</a></div>
+  <div class="toolbar table-toolbar">
+    <label class="search-field"><span class="sr-only">Search inventory</span>{{ icon('search', 17) }}<input id="inventory-search" type="search" placeholder="Search by product name or ID…"></label>
+    <div class="filter-group"><label><span class="sr-only">Category</span><select id="inventory-category"><option value="">All categories</option><option>Food</option><option>Hygiene</option></select></label><label><span class="sr-only">Stock status</span><select id="inventory-status"><option value="">All statuses</option><option value="available">In stock</option><option value="expiring">Expiring soon</option><option value="expired">Expired</option><option value="out">Out of stock</option></select></label></div>
   </div>
-  <div class="table-scroll"><table id="inventory-table">
-    <thead><tr><th>Select</th><th>Image</th><th>ID</th><th>Name</th><th>Category</th><th>Quantity</th><th>Received</th><th>Expires</th></tr></thead>
-    <tbody></tbody>
+  <div class="selection-bar"><span id="selection-count">Select a product to manage it</span><button id="edit-item" class="secondary" disabled>Edit selected</button><button id="delete-items" class="danger" disabled>Delete selected</button></div>
+  <div class="table-scroll"><table id="inventory-table"><caption class="sr-only">Inventory products and stock status</caption>
+    <thead><tr><th><span class="sr-only">Select</span></th><th><span class="sr-only">Image</span></th><th>ID</th><th>Product</th><th>Category</th><th>Quantity</th><th>Received</th><th>Expires</th><th>Status</th></tr></thead><tbody></tbody>
   </table></div>
-  <p id="inventory-empty" hidden>No matching inventory items.</p>
+  <div id="inventory-empty" class="empty-state" hidden><span class="empty-icon">{{ icon('box', 28) }}</span><h3>No matching products</h3><p>Add your first item or adjust the filters to find your supplies.</p><button id="clear-filters" class="secondary">Reset filters</button></div>
+  <div class="panel-footer"><span id="inventory-count" role="status">Loading inventory…</span><span>Click a column heading to sort</span></div>
 </section>
-<dialog id="item-dialog">
-  <form id="item-form" class="stack">
-    <h2 id="item-form-title">Add item</h2>
+<dialog id="item-dialog" aria-labelledby="item-form-title">
+  <form id="item-form" class="stack"><div><p class="eyebrow">PRODUCT DETAILS</p><h2 id="item-form-title">Add item</h2><p class="subtitle">Keep your inventory details accurate and up to date.</p></div>
     <input type="hidden" name="id">
-    <label>Name <input name="name" maxlength="255" required></label>
-    <label>Category <select name="category"><option>Food</option><option>Hygiene</option></select></label>
-    <label>Quantity <input name="quantity" type="number" min="0" step="1" required></label>
-    <label>Received <input name="received_on" type="date" required></label>
-    <label>Expires <input name="expires_on" type="date" required></label>
+    <label>Name <input name="name" maxlength="255" placeholder="e.g. Brown rice, 1 kg" required></label>
+    <div class="form-grid"><label>Category <select name="category"><option>Food</option><option>Hygiene</option></select></label><label>Quantity <input name="quantity" type="number" min="0" step="1" placeholder="0" required></label></div>
+    <div class="form-grid"><label>Received <input name="received_on" type="date" required></label><label>Expires <input name="expires_on" type="date" required></label></div>
     <p id="item-error" role="alert" hidden></p>
-    <div class="toolbar"><button>Save</button><button type="button" id="close-item" class="secondary">Cancel</button></div>
+    <div class="toolbar dialog-actions"><button type="button" id="close-item" class="secondary">Cancel</button><button type="submit">Save item</button></div>
   </form>
 </dialog>
 {% endblock %}
 {% block scripts %}<script type="module" src="{{ url_for('static', filename='js/pages/inventory.js') }}"></script>{% endblock %}
-

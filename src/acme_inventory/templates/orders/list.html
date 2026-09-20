@@ -1,15 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
-<section class="panel">
-  <div class="toolbar"><h1>Orders</h1><a class="button" href="{{ url_for('orders.create_page') }}">Create order</a></div>
-  <div class="table-scroll"><table>
-    <thead><tr><th>ID</th><th>Order date</th><th>Delivery date</th><th>Status</th><th>Items</th><th>Recipient</th></tr></thead>
-    <tbody>{% for order in orders %}<tr>
-      <td>{{ order.id }}</td><td>{{ order.ordered_on }}</td><td>{{ order.delivered_on or '—' }}</td><td>{{ order.status }}</td>
-      <td><ul>{% for name, quantity in details[order.id] %}<li>{{ name }} × {{ quantity }}</li>{% endfor %}</ul></td>
-      <td>{{ order.recipient_name }}<br>{{ order.recipient_address }}</td>
-    </tr>{% else %}<tr><td colspan="6">No orders yet.</td></tr>{% endfor %}</tbody>
-  </table></div>
+<div class="page-heading"><div><p class="eyebrow">OUTGOING SUPPLIES</p><h1>Recipient orders</h1><p class="subtitle">Keep track of the supplies going to your community.</p></div><a class="button" href="{{ url_for('orders.create_page') }}">{{ icon('plus', 18) }} Create order</a></div>
+<section class="panel"><div class="panel-heading"><div><h2>All orders <span class="heading-count">{{ orders|length }}</span></h2><p>Order details, recipients, and delivery information.</p></div><a class="text-link" href="{{ url_for('reports.index') }}">{{ icon('download', 16) }} Export reports</a></div>
+{% if orders %}<div class="table-scroll"><table><thead><tr><th>Order</th><th>Recipient</th><th>Products</th><th>Order date</th><th>Delivery date</th><th>Status</th></tr></thead><tbody>{% for order in orders %}<tr>
+<td class="reference">#{{ '%04d'|format(order.id) }}</td><td><strong>{{ order.recipient_name }}</strong><span class="cell-secondary">{{ order.recipient_address }}</span></td>
+<td><ul class="item-list">{% for name, quantity in details[order.id] %}<li>{{ name }} <span class="numeric">× {{ quantity }}</span></li>{% endfor %}</ul></td><td>{{ order.ordered_on }}</td><td>{{ order.delivered_on or '—' }}</td><td><span class="badge {{ 'neutral' if order.status == 'Cancelled' else '' }}">{{ order.status }}</span></td></tr>{% endfor %}</tbody></table></div><div class="panel-footer"><span>{{ orders|length }} order{{ '' if orders|length == 1 else 's' }}</span><span>Most recently created first</span></div>
+{% else %}<div class="empty-state"><span class="empty-icon">{{ icon('orders', 30) }}</span><h3>Your orders will appear here</h3><p>Create a recipient order to record supplies leaving your food bank.</p><a class="button" href="{{ url_for('orders.create_page') }}">{{ icon('plus', 16) }} Create first order</a></div>{% endif %}
 </section>
 {% endblock %}
-

@@ -1,24 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
-<section class="panel narrow">
-  <h1>Add donation</h1>
+<div class="page-heading"><div><p class="eyebrow">INCOMING SUPPLIES</p><h1>Receive a donation</h1><p class="subtitle">Record donated supplies and keep your stock up to date.</p></div><a class="button secondary" href="{{ url_for('inventory.index') }}">View inventory {{ icon('arrow', 16) }}</a></div>
+<div class="form-layout"><section class="panel"><div class="panel-heading"><div><h2>Donation details</h2><p>Choose an existing product or create a new one.</p></div>{{ icon('receive') }}</div><div class="panel-body">
   <form action="{{ url_for('donations.create') }}" method="post" enctype="multipart/form-data" class="stack" id="donation-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Product <select name="item_id" id="donation-item">
-      <option value="">Create a new product</option>
-      {% for item in items %}<option value="{{ item.id }}">#{{ item.id }} · {{ item.name }}</option>{% endfor %}
-    </select></label>
-    <fieldset id="new-product"><legend>New product</legend>
-      <label>Name <input name="name" maxlength="255" required></label>
-      <label>Category <select name="category"><option>Food</option><option>Hygiene</option></select></label>
-    </fieldset>
-    <label>Quantity received <input type="number" name="quantity" min="1" step="1" required></label>
-    <label>Received date <input type="date" name="received_on" required></label>
-    <label>Expiration date <input type="date" name="expires_on" required></label>
-    <label>Image (optional) <input type="file" name="image" accept="image/png,image/jpeg,image/gif,image/webp"></label>
-    <button>Receive donation</button>
-  </form>
-</section>
+    <label>Product <select name="item_id" id="donation-item"><option value="">Create a new product</option>{% for item in items %}<option value="{{ item.id }}">#{{ item.id }} · {{ item.name }}</option>{% endfor %}</select></label>
+    <fieldset id="new-product"><legend>New product details</legend><div class="form-grid"><label>Name <input name="name" maxlength="255" placeholder="Product name" required></label><label>Category <select name="category"><option>Food</option><option>Hygiene</option></select></label></div></fieldset>
+    <label>Quantity received <input type="number" name="quantity" min="1" step="1" placeholder="Enter number of items" required></label>
+    <div class="form-grid"><label>Received date <input type="date" name="received_on" required></label><label>Expiration date <input type="date" name="expires_on" required></label></div>
+    <label>Product image <span class="optional">(optional)</span><input type="file" name="image" accept="image/png,image/jpeg,image/gif,image/webp"></label>
+    <div class="form-actions"><button>{{ icon('check', 16) }} Receive donation</button><a class="button secondary" href="{{ url_for('inventory.index') }}">Cancel</a></div>
+  </form></div></section><aside class="form-note">{{ icon('leaf', 26) }}<h3>Make every donation count</h3><p>Check the product and quantity before receiving it. The donated quantity will be added to your inventory.</p><p>For an existing product, the dates entered here replace its current received and expiration dates.</p><p>Images help your team identify supplies. PNG, JPEG, GIF, and WebP are supported.</p></aside></div>
 {% endblock %}
 {% block scripts %}<script type="module" src="{{ url_for('static', filename='js/pages/donations.js') }}"></script>{% endblock %}
-

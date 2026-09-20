@@ -26,3 +26,23 @@ There is no frontend build step or external CDN dependency.
 Do not create empty services, migration directories, or repository abstractions
 before they have a concrete responsibility. Add domain modules as features grow.
 
+
+## Interface
+
+The workspace uses a persistent desktop sidebar and a compact mobile navigation
+ grid, a shared page header, reusable metric cards, and consistent forms and tables.
+The authenticated overview shows real product counts, expiration alerts, category
+mix, and recent orders; the public home page does not expose inventory information.
+
+Inventory filters combine product search, category, and stock status. “Expiring
+soon” means stock on hand with an expiration date from today through seven days
+from today, inclusive. “Expired” excludes products with zero quantity. “In stock”
+means a positive physical balance, not a guarantee that the product is fit to
+issue. Status is communicated with text as well as color. Overview cards link to
+corresponding inventory filters. No sample records are added to the user's database.
+
+Shared colors and layout live in static/css/base.css; components and responsive
+rules live in static/css/components.css. Inline SVG icons are defined in the Jinja
+icons macro, with no external icon or font dependency. Forms retain visible labels,
+keyboard focus states, and a skip-to-content link. Wide tables scroll within their
+own container on small screens.

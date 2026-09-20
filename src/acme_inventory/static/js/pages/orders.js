@@ -39,11 +39,10 @@ form.addEventListener('submit', async event => {
   event.preventDefault();
   const data = Object.fromEntries(new FormData(form));
   data.items = [...lines].map(([item_id, line]) => ({ item_id, quantity: line.quantity }));
-  const submit = form.querySelector('button:not([type])');
+  const submit = form.querySelector('button[type="submit"]');
   submit.disabled = true;
   try {
     await jsonRequest(form.action, { method: 'POST', body: JSON.stringify(data) });
     window.location.assign(form.dataset.success);
   } catch (error) { showMessage(error.message, true); submit.disabled = false; }
 });
-
