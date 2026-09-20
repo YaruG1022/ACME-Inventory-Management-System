@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel">
+  <h1>ACME Food Bank</h1>
+  <p>Track donated food and hygiene products, manage recipient orders, and export inventory reports.</p>
+  {% if current_user.is_authenticated %}
+    <div class="toolbar">
+      <a class="button" href="{{ url_for('inventory.index') }}">View inventory</a>
+      <a class="button secondary" href="{{ url_for('donations.create_page') }}">Add donation</a>
+      <a class="button secondary" href="{{ url_for('orders.create_page') }}">Create order</a>
+    </div>
+  {% else %}
+    <a class="button" href="{{ url_for('auth.login_page') }}">Log in to get started</a>
+  {% endif %}
+</section>
+{% endblock %}
+

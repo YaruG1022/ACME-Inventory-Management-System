@@ -1,15 +1,22 @@
-# do not commit venv, pycache, and package info.
+.venv/
 venv/
-src/__pycache__/
-src/WSU_SU21_CPTS322_Project.egg-info
-src/data/test.db
-src/data/inventory.db
-src/secret.txt
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+build/
+dist/
+.env
+instance/
+src/instance/
 secret.txt
-
+# Preserve private legacy runtime files until explicitly imported.
+src/data/
 src/static/img/
-
+src/secret.txt
 src/certs/*.crt
 src/certs/*.key
 src/certs/*.pem
-src/data/inventory.db

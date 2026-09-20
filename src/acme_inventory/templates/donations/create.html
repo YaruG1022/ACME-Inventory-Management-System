@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel narrow">
+  <h1>Add donation</h1>
+  <form action="{{ url_for('donations.create') }}" method="post" enctype="multipart/form-data" class="stack" id="donation-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Product <select name="item_id" id="donation-item">
+      <option value="">Create a new product</option>
+      {% for item in items %}<option value="{{ item.id }}">#{{ item.id }} · {{ item.name }}</option>{% endfor %}
+    </select></label>
+    <fieldset id="new-product"><legend>New product</legend>
+      <label>Name <input name="name" maxlength="255" required></label>
+      <label>Category <select name="category"><option>Food</option><option>Hygiene</option></select></label>
+    </fieldset>
+    <label>Quantity received <input type="number" name="quantity" min="1" step="1" required></label>
+    <label>Received date <input type="date" name="received_on" required></label>
+    <label>Expiration date <input type="date" name="expires_on" required></label>
+    <label>Image (optional) <input type="file" name="image" accept="image/png,image/jpeg,image/gif,image/webp"></label>
+    <button>Receive donation</button>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static', filename='js/pages/donations.js') }}"></script>{% endblock %}
+

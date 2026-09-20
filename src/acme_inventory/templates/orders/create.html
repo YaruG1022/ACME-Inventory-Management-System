@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel">
+  <h1>Create order</h1>
+  <form id="order-form" action="{{ url_for('orders.create') }}" data-success="{{ url_for('orders.index') }}" class="stack">
+    <div class="toolbar">
+      <label>Product <select id="order-item">{% for item in items %}<option value="{{ item.id }}">#{{ item.id }} · {{ item.name }} ({{ item.quantity }} available)</option>{% endfor %}</select></label>
+      <label>Quantity <input id="order-quantity" type="number" min="1" step="1" value="1"></label>
+      <button type="button" id="add-order-line" class="secondary">Add to order</button>
+    </div>
+    <ul id="order-lines"></ul>
+    <label>Order date <input name="ordered_on" type="date" required></label>
+    <label>Recipient name <input name="recipient_name" maxlength="255" required></label>
+    <label>Recipient address <input name="recipient_address" maxlength="255" required></label>
+    <button>Create order</button>
+  </form>
+</section>
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static', filename='js/pages/orders.js') }}"></script>{% endblock %}
+

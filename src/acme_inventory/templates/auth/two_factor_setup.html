@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel narrow">
+  <h1>Set up two-factor authentication</h1>
+  <p>Scan this QR code with your authenticator app, then enter its six-digit code.</p>
+  <img class="qr-image" src="data:image/png;base64,{{ qr_image }}" alt="Authenticator setup QR code">
+  <form action="{{ url_for('auth.verify_otp') }}" method="post" class="stack">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Authenticator code <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" required></label>
+    <button>Enable two-factor authentication</button>
+  </form>
+</section>
+{% endblock %}
+

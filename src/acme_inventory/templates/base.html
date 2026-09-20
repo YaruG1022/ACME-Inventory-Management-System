@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{{ title }} · ACME Inventory</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+  {% block styles %}{% endblock %}
+</head>
+<body>
+  {% include 'components/navigation.html' %}
+  <main>
+    {% include 'components/messages.html' %}
+    <p id="page-message" class="notice" role="status" hidden></p>
+    {% block content %}{% endblock %}
+  </main>
+  <footer>ACME Food Bank Inventory System</footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
+

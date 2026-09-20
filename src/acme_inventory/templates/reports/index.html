@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel" id="reports-page" data-api="{{ url_for('reports.preview') }}" data-export="{{ url_for('reports.export') }}">
+  <h1>Reports</h1>
+  <div class="toolbar">
+    <label>Report <select id="report-type"><option value="inventory">Inventory</option><option value="orders">Orders</option></select></label>
+    <label>Format <select id="report-format"><option value="csv">CSV</option><option value="xlsx">XLSX</option></select></label>
+    <button id="export-report">Export report</button>
+    <label>Search preview <input id="report-search" type="search"></label>
+  </div>
+  <p>Exports include all rows in the selected report. Search filters the preview only.</p>
+  <div class="table-scroll"><table id="report-table"><thead></thead><tbody></tbody></table></div>
+  <p id="report-empty" hidden>No matching records.</p>
+</section>
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static', filename='js/pages/reports.js') }}"></script>{% endblock %}
+

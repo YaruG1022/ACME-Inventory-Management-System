@@ -1,105 +1,95 @@
-# Acme Food Bank Inventory Tracking System
-WSU-SU21-CPTS322-Project
+# ACME Food Bank Inventory Tracking System
 
+A Flask application for tracking donated food and hygiene products, recipient
+orders, and inventory reports. Originally created for WSU SU21 CPTS 322.
 
+## Setup
 
-## Project summary
+Python 3.10 or newer is required. From the repository root:
 
-### Description of the project
-A web application for efficient inventory management of food and hygiene product donations using Python, Flask, HTML, JavaScript and SQLite.
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -e ".[dev]"
+Copy-Item .env.example .env
+python -m flask --app acme_inventory init-db
+python -m flask --app acme_inventory run
+```
 
-### Additional information about the project
-The Acme Food Bank Inventory Tracking System is designed to address the challenges faced by food banks in managing frequent and varied donations. This system aims to facilitate real-time updates, provide secure user authentication, and generate detailed reports to enhance operational efficiency. It offers a user-friendly interface for managing inventory, tracking donations, updating stock, and processing recipient orders.
+On macOS/Linux, activate with `source .venv/bin/activate` and copy configuration
+with `cp .env.example .env`. Open http://127.0.0.1:5000 and register a local account.
+No default account or password is created.
 
-## Installation
+Imports do not create database tables. `init-db` creates missing tables without
+clearing existing ones; it is not a schema migration command. Local data, secrets,
+and uploads live in Flask's instance directory, outside the application package.
+Set `ACME_INSTANCE_PATH` in `.env` to select a specific absolute directory.
 
-### Prerequisites
+## Features
 
-Before you begin, ensure you have the following installed on your machine:
-- Git
-- Python (version 3.8 or higher)
-- SQLite
-- SQLAlchemy
+- Registration, login, logout, profile/password updates, authenticator-based 2FA.
+- Inventory listing, filtering, sorting, creating, editing, and protected deletion.
+- Receiving donations into new/existing items, with optional image uploads.
+- Recipient orders with atomic stock deductions and validation.
+- Inventory/order report previews and CSV/XLSX exports.
 
-### Installation Steps
+Each item still has a single balance and expiration date; replenishment updates
+its dates. Batches, locations, reservations, cancellation workflows, and role-based
+permissions are future work. All registered users have the same operational access.
+Public registration is intended for the course/demo workflow and should be reviewed
+before public deployment.
 
-#### Setup
-Before development, creating a virtual environment is recommended.
-To create a virtual environment, run:
-````
-python -m venv venv
-````
-then activate it on windows with:
-````
-.\venv\Scripts\Activate.ps1
-````
-or on linux by running:
-````
-source ./venv/bin/activate
-````
+## Existing installations
 
-Then, install all dependencies with:
-````
-pip install -e .
-````
-#### Running
+Stop the old app and back up its data. Do **not** run `init-db` before importing.
+With a fresh instance directory:
 
-To run the **development server**, enter the src directory (``cd src``) and run:
-````
-python app.py
-````
+```powershell
+python -m flask --app acme_inventory import-legacy --database src/data/inventory.db --images src/static/img
+```
 
-### Accessing on other devices
+Use absolute source paths when importing from another checkout. The command copies
+the database and optional images, rewrites image URLs in the copy, and leaves the
+originals untouched. It refuses to overwrite an existing destination database.
+Users, password hashes, 2FA secrets, items, and orders remain compatible. Users must
+log in again. See [development notes](docs/development.md).
 
-If connecting to the server's IP address doesn't work on other devices and the server is using Windows, make sure to set the Wifi network to a private network and then disable Microsoft Defender Firewall.
+## Structure
 
-## Using TLS Encryption
+```text
+src/acme_inventory/
+  __init__.py       application factory
+  config.py        runtime configuration
+  extensions.py    shared Flask extensions
+  cli.py           initialization and legacy import
+  models/          database mappings
+  routes/          HTTP endpoints and access checks
+  services/        business operations and integrations
+  templates/       feature folders and shared components
+  static/          shared CSS, page JS modules, bundled images
+tests/             isolated regression tests
+docs/              architecture, data model, workflows and development
+```
 
-To configure the server to use HTTPS, ``SSL_Enabled`` must be set to ``True`` in ``server.ini``.
+## Validation
 
-Without manually set certificates, the server will use a temporary "ad-hoc" certificate. This will cause the browser to give a warning (which can be dismissed in Chrome by clicking ``Advanced -> Proceed to [address] (unsafe)`` or in Firefox with ``Advanced -> Add Exception``). Keep in mind that this will still create a secure, encrypted connection.
+```powershell
+python -m pytest
+python -m ruff check src/acme_inventory tests
+python -m build
+```
 
-To circumvent this, you can
-- Create a self signed certificate using openSSL, import it in the user's browser.
-- Use a service like LetsEncrypt to generate a certificate for your server.
+For development, enable debug explicitly with `flask run --debug`. The old
+`src/app.py`, `server.ini`, TLS launcher and prototype routes are retired.
+For deployment, use a production WSGI server with `acme_inventory:create_app()`,
+terminate HTTPS at a reverse proxy, configure a stable `ACME_SECRET_KEY`, and
+back up instance data. Do not disable the firewall to expose the app.
 
-Then put your certificates in the ``src/certs/`` folder and add their filenames in ``server.ini`` under ``Server_Certificate`` and ``Server_Key``
+## Documentation
 
-## 2-Factor Authentication
+- [Architecture and naming](docs/architecture.md)
+- [Data model and compatibility](docs/data-model.md)
+- [Business workflows](docs/workflows.md)
+- [Development and API changes](docs/development.md)
 
-To enable 2FA, go to your user account page and click "Set up 2-Factor Authentication" and follow the steps provided. Right now, 2FA can't be disabled for the user, but the setup page can be revisited in case you need to connect a new authenticator or lost access to the secret token.
-
-## Functionality
-
-To use the Acme Food Bank Inventory Tracking System, follow these steps:
-
-1. **Log In/Sign Up**: Users can sign up for a new account or log in to an existing one.
-2. **Homepage**: Upon logging in, users are taken to the dashboard which provides an overview of general information.
-3. **Add New Donation**: Navigate to the "Add Donation" page to enter details of new donations and update the inventory.
-4. **Update Inventory**: Modify existing inventory items by navigating to the "Update Inventory" page.
-5. **Generate Report**: Create customized reports by selecting the desired parameters on the "Generate Report" page.
-7. **Recipient Orders**: Recipients can place their demand requests, which are processed by the system.
-8. **User Center**: Users can costumize their avatar and change their username, email address and password.
-
-
-## Known Problems
-
-For an up-to-date list of known issues, please refer to the [GitHub Issues Board](https://github.com/YaruG1022/WSU-SU21-CPTS322-Project/issues). 
-If you encounter a new issue, please open a new issue on our GitHub Issues Board, providing as much detail as possible to help us diagnose and fix the problem.
-
-## Contributing
-We welcome contributions from the community! Follow these steps to contribute:
-
-1. Fork it!
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
-5. Submit a pull request :D
-
-## Additional Documentation
-
-For more detailed documentation, refer to the following files:
-- [Sprint Reports](Sprint_Reports)
-
-## License
-This project is licensed under the MIT License. See the [LICENSE.txt](LICENSE.txt) file for details.
+Licensed under the [MIT License](LICENSE.txt).

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel narrow">
+  <h1>Verify login</h1>
+  <form action="{{ url_for('auth.verify_otp') }}" method="post" class="stack">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Authenticator code <input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" required></label>
+    <button>Verify</button>
+  </form>
+</section>
+{% endblock %}
+

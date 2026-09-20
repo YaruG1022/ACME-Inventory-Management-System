@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel" id="inventory-page" data-api="{{ url_for('inventory.list_items') }}" data-delete="{{ url_for('inventory.delete_items') }}">
+  <h1>Inventory</h1>
+  <div class="toolbar">
+    <button id="add-item">Add item</button>
+    <button id="edit-item" class="secondary" disabled>Edit selected</button>
+    <button id="delete-items" class="danger" disabled>Delete selected</button>
+    <label>Search <input id="inventory-search" type="search" placeholder="Name, category or ID"></label>
+  </div>
+  <div class="table-scroll"><table id="inventory-table">
+    <thead><tr><th>Select</th><th>Image</th><th>ID</th><th>Name</th><th>Category</th><th>Quantity</th><th>Received</th><th>Expires</th></tr></thead>
+    <tbody></tbody>
+  </table></div>
+  <p id="inventory-empty" hidden>No matching inventory items.</p>
+</section>
+<dialog id="item-dialog">
+  <form id="item-form" class="stack">
+    <h2 id="item-form-title">Add item</h2>
+    <input type="hidden" name="id">
+    <label>Name <input name="name" maxlength="255" required></label>
+    <label>Category <select name="category"><option>Food</option><option>Hygiene</option></select></label>
+    <label>Quantity <input name="quantity" type="number" min="0" step="1" required></label>
+    <label>Received <input name="received_on" type="date" required></label>
+    <label>Expires <input name="expires_on" type="date" required></label>
+    <p id="item-error" role="alert" hidden></p>
+    <div class="toolbar"><button>Save</button><button type="button" id="close-item" class="secondary">Cancel</button></div>
+  </form>
+</dialog>
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static', filename='js/pages/inventory.js') }}"></script>{% endblock %}
+

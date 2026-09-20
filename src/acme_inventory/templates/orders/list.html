@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="panel">
+  <div class="toolbar"><h1>Orders</h1><a class="button" href="{{ url_for('orders.create_page') }}">Create order</a></div>
+  <div class="table-scroll"><table>
+    <thead><tr><th>ID</th><th>Order date</th><th>Delivery date</th><th>Status</th><th>Items</th><th>Recipient</th></tr></thead>
+    <tbody>{% for order in orders %}<tr>
+      <td>{{ order.id }}</td><td>{{ order.ordered_on }}</td><td>{{ order.delivered_on or '—' }}</td><td>{{ order.status }}</td>
+      <td><ul>{% for name, quantity in details[order.id] %}<li>{{ name }} × {{ quantity }}</li>{% endfor %}</ul></td>
+      <td>{{ order.recipient_name }}<br>{{ order.recipient_address }}</td>
+    </tr>{% else %}<tr><td colspan="6">No orders yet.</td></tr>{% endfor %}</tbody>
+  </table></div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,16 @@
+<nav aria-label="Main navigation">
+  <a class="brand" href="{{ url_for('home.index') }}">ACME Inventory</a>
+  {% if current_user.is_authenticated %}
+    {% for endpoint, label in [('inventory.index', 'Inventory'), ('donations.create_page', 'Donations'), ('orders.index', 'Orders'), ('reports.index', 'Reports'), ('account.profile', 'Account')] %}
+      <a href="{{ url_for(endpoint) }}" {% if request.blueprint == endpoint.split('.')[0] %}aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
+    <form action="{{ url_for('auth.logout') }}" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="secondary">Log out</button>
+    </form>
+  {% else %}
+    <a href="{{ url_for('auth.login_page') }}">Log in</a>
+    <a href="{{ url_for('auth.register_page') }}">Register</a>
+  {% endif %}
+</nav>
+
