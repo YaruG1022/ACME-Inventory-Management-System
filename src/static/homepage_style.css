@@ -1,0 +1,175 @@
+
+
+
+/* Slideshow styles */
+* {
+    box-sizing: border-box
+}
+
+.mySlides {
+    display: none;
+}
+
+img {
+    vertical-align: middle;
+}
+
+/* Slideshow container */
+.slideshow-container {
+    max-width: auto;
+    max-height: 300px;
+    position: relative;
+    margin: auto;
+}
+
+/* Slide images container */
+.slide-images-container {
+    display: flex;
+    justify-content: space-around; /* Change from space-between to space-around */
+    padding: 20px;
+}
+
+/* Slide image */
+.slide-image {
+    width: auto;
+    height: 250px;
+    border: 2px solid #ccc;
+    border-radius: 5%;
+    margin: 0 10px;
+}
+
+/* Next & previous buttons */
+.slideshow-container .prev, .next {
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    width: auto;
+    height: 100%;
+    padding: 16px;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    transition: 0.6s ease;
+    border-radius: 0 3px 3px 0;
+    user-select: none;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.next {
+    right: 0;
+    border-radius: 3px 0 0 3px;
+}
+
+.prev {
+    left: 0;
+    border-radius: 3px 0 0 3px;
+}
+
+.prev:hover, .next:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Dots */
+.dots-container {
+    text-align: center;
+    padding: 20px;
+    background: #1abc;
+}
+
+.slideshow-container .dot {
+    cursor: pointer;
+    height: 15px;
+    width: 15px;
+    margin: 0 2px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.6s ease;
+}
+
+.slideshow-container .dot.active, .dot:hover {
+    background-color: #717171;
+}
+
+/* Fading animation */
+.slideshow-container .fade {
+    animation-name: fade;
+    animation-duration: 1.5s;
+}
+
+@keyframes fade {
+    from {
+        opacity: .4
+    }
+
+    to {
+        opacity: 1
+    }
+}
+/* Style for small screen */
+@media only screen and (max-width: 300px) {
+    .prev,
+    .next,
+    .text {
+        font-size: 11px
+    }
+}
+
+
+/* Menu Styles */
+.menu {
+    padding: 10px;
+    margin-top: 50px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    
+}
+
+.menu ul {
+    list-style-type: none;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    -ms-flex: 30%; /* IE10 */
+    flex: 30%;
+}
+
+
+.menu ul li {
+    background-color: #1E90FF;
+    color: white;
+    padding: 20px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    text-align: center;
+    margin-left: 5px;
+    margin-right: 5px;
+    justify-content: center; 
+    float: center;
+    border-radius: 5%;
+
+}
+
+.menu ul li:hover {
+    background-color: #1c7fcc;
+}
+
+/* Content Styles */
+.content {
+    background-color: WhiteSmoke;
+    padding: 20px;
+    border-radius: 5px;
+    justify-content: center;
+}
+
+.menu-content {
+    display: none;
+}
+
+.menu-content.active {
+    display: block;
+}

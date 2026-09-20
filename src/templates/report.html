@@ -1,0 +1,182 @@
+﻿{% extends 'interface_base.html' %}
+{% block content %}
+    <div class="report-container">
+        <h1>Generate Report</h1>
+        <hr>
+        <div class="report-form-container">
+            <form id="reportForm" onsubmit="exportReport(); return false;" style="width: 25%;">
+                <label for="reportType">Select Report Type:</label>
+                <select id="reportType" name="reportType" class="report-select" onchange="fetchReportData()">
+                    <option value="inventory">Inventory Items</option>
+                    <option value="recipient order">Recipient Order</option>
+                </select>
+                <label for="exportFormat">Select Export Format:</label>
+                <select id="exportFormat" name="exportFormat" class="report-select">
+                    <option value="csv">CSV</option>
+                    <option value="xls">XLS</option>
+                </select>
+                <button type="submit" class="report-button">Generate Report</button>
+            </form>
+        </div>
+        
+
+        <div class="report-search-container">
+            <input type="text" id="searchBar" class="report-search" onkeyup="searchItems()" placeholder="Search for items...">
+            <button type="button" class="report-button" onclick="exactMatchSearch()"><i class="fa fa-search"></i></button>
+        </div>
+
+        <table id="reportTable">
+            <thead>
+                <!-- Headers will be dynamically inserted here -->
+            </thead>
+            <tbody>
+                <!-- Data will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let currentSortColumn = null;
+        let currentSortOrder = 'asc';
+
+        // Function to fetch and display the report data
+        function fetchReportData(reportType) {
+            reportType = reportType || document.getElementById('reportType').value;
+
+            fetch(`/getReportData?reportType=${reportType}`)
+            .then(response => response.json())
+            .then(data => {
+                const tableHead = document.getElementById('reportTable').getElementsByTagName('thead')[0];
+                const tableBody = document.getElementById('reportTable').getElementsByTagName('tbody')[0];
+
+                // Clear existing headers and rows
+                tableHead.innerHTML = '';
+                tableBody.innerHTML = '';
+
+                // Create table headers
+                const headerRow = document.createElement('tr');
+                data.columns.forEach((col, index) => {
+                    const th = document.createElement('th');
+                    th.textContent = col;
+                    th.classList.add('sortable');
+                    th.setAttribute('data-index', index);
+                    th.onclick = () => sortTable(index);
+                    headerRow.appendChild(th);
+                });
+                tableHead.appendChild(headerRow);
+
+                // Create table rows
+                data.data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    data.columns.forEach(col => {
+                        const td = document.createElement('td');
+                        td.textContent = row[col];
+                        tr.appendChild(td);
+                    });
+                    tableBody.appendChild(tr);
+                });
+            })
+            .catch(error => console.error('Error fetching report data:', error));
+        }
+
+        // Function to sort the table
+        function sortTable(columnIndex) {
+            const table = document.getElementById('reportTable');
+            const tbody = table.getElementsByTagName('tbody')[0];
+            const rows = Array.from(tbody.getElementsByTagName('tr'));
+            const isAsc = currentSortColumn === columnIndex && currentSortOrder === 'asc';
+
+            rows.sort((a, b) => {
+                const aText = a.getElementsByTagName('td')[columnIndex].textContent.trim().toLowerCase();
+                const bText = b.getElementsByTagName('td')[columnIndex].textContent.trim().toLowerCase();
+
+                if (!isNaN(aText) && !isNaN(bText)) {
+                    // Sort numerically if both values are numbers
+                    return isAsc ? aText - bText : bText - aText;
+                } else {
+                    // Sort as strings
+                    if (aText < bText) return isAsc ? -1 : 1;
+                    if (aText > bText) return isAsc ? 1 : -1;
+                    return 0;
+                }
+            });
+
+            // Append sorted rows back to the table
+            rows.forEach(row => tbody.appendChild(row));
+
+            // Update sorting state
+            currentSortColumn = columnIndex;
+            currentSortOrder = isAsc ? 'desc' : 'asc';
+        }
+
+        // Function to export and download the report
+        function exportReport() {
+            const reportType = document.getElementById('reportType').value;
+            const exportFormat = document.getElementById('exportFormat').value;
+
+            fetch('/generateReport', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ reportType: reportType, exportFormat: exportFormat })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = exportFormat === 'csv' ? 'report.csv' : 'report.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => console.error('Error generating report:', error));
+        }
+
+        // Function to search items in the table
+        function searchItems() {
+            const query = document.getElementById('searchBar').value.toLowerCase().trim();
+            const rows = document.getElementById('reportTable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j].innerText.toLowerCase().trim().includes(query)) {
+                        match = true;
+                        break;
+                    }
+                }
+                rows[i].style.display = match ? '' : 'none';
+            }
+        }
+
+        // Function to perform exact match search
+        function exactMatchSearch() {
+            const query = document.getElementById('searchBar').value.toLowerCase().trim();
+            const rows = document.getElementById('reportTable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j].innerText.toLowerCase().trim() === query) {
+                        match = true;
+                        break;
+                    }
+                }
+                rows[i].style.display = match ? '' : 'none';
+            }
+        }
+
+        // Load the default report when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchReportData('inventory');
+        });
+    </script>
+{% endblock %}

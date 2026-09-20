@@ -1,0 +1,132 @@
+.inventory-container {
+    padding: 16px;
+    background-color: white;
+    margin-left: auto;
+    margin-right: auto;
+    width: 85%;
+}
+
+.inventory-container hr {
+    border: 1px solid #f1f1f1;
+    margin-bottom: 25px;
+}
+
+
+
+/* Style for inventory edition buttons */
+.inventory-buttons {
+    width: 90%;
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font: Arial;
+
+}
+
+.inventory-buttons button {
+    background-color: #ddd;
+    border: 1px solid gray;
+    color: black;
+    padding: 10px 20px;
+    margin-right: 2px;
+    margin-left: 2px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 4px;
+}
+.inventory-buttons button.disabled {
+    background-color: #ddd;
+    cursor: not-allowed;
+}
+.inventory-buttons button img {
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+
+/* Style for search bar */
+.inventory-search {
+    padding: 10px;
+    margin-top: 8px;
+    font-size: 17px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: calc(100% - 44px);
+}
+
+.inventory-search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    width: 50%;
+}
+
+.inventory-search-container button {
+    margin-left: 8px;
+}
+
+
+/* Style for search button */
+.inventory-search-button {
+    background-color: #4b64d6;
+    color: white;
+    padding: 10px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: auto;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.inventory-search-button:hover {
+    background-color: #4b64d6;
+}
+
+
+.inventoryTable {
+    width: 90%;
+}
+
+/* Style for select elements */
+.inventory-select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Table styles */
+.inventory-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.inventory-container th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.inventory-container th {
+    background-color: #f2f2f2;
+}
+
+.inventory-container tr:hover {
+    background-color: #f5f5f5;
+}
+
+th.sortable:hover {
+    cursor: pointer;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.status-cell {
+    white-space: pre-line; /* Enables multi-line status display */
+}

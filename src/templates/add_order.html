@@ -1,0 +1,147 @@
+{% extends 'interface_base.html' %}
+{% block content %}
+<form action="{{ url_for('neworder') }}" method="post">
+    <div class="order-form-container">
+        <h1>Create new Order: </h1>
+        <hr>
+        
+        
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div class="warning">
+        <p>{{ messages[0] }}</p>
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <h2>Add items to order:</h2>
+        <label for="item"><b>Search product name/ID: </b></label>
+        <div id="search-div">
+            <input id="searchbox" name="search" autocomplete="off" placeholder="Enter item name/ID"> x <input id="search_quantity" type="number" min="1" placeholder="quantity" value="1" required >
+            <div id="search_dropdown">
+        
+            </div>
+            <br>
+        </div>
+        <input type="hidden" id="items_input" name="itemdata">
+        <!-- Only show if new item being created -->
+        <!-- Holds list of item IDs and quanities to add -->
+        <b><p id="sel-items">No items added.</p></b>
+        <hr>
+        <div class="order-date">
+            <label for="order-date"><b>Order date:</b></label> <input type="date" name="order-date" required>
+        </div>
+        <br>
+        <div class="recipient">
+            <label for="recipient-address"><b>Recipient Address:</b></label> <input name="recipient-address" required><br>
+            <label for="recipient-name"><b>Recipient Name:</b></label> <input name="recipient-name" required>
+        </div>
+
+        <br>
+        <hr/>
+        <br>
+        <button type="submit" class="create">Add Order</button>
+    </div>
+</form>
+
+<script>
+
+    var items_to_submit = [];
+    var item_names = [];
+    /* Item search script */
+    function add_item_to_list(name, id, quantity)
+    {
+        console.log("Quantity = " + quantity)
+        items_to_submit.push(id + "x" + quantity);
+        console.log(items_to_submit);
+        item_names.push(name);
+        repopulate_item_lists();
+        getSearchQuery()
+    }
+
+    function remove_item(index)
+    {
+        items_to_submit.splice(index, 1);
+        item_names.splice(index, 1);
+        repopulate_item_lists();
+        getSearchQuery()
+    }
+
+    function repopulate_item_lists()
+    {
+        $("#items_input").html("");
+        $("#sel-items").html("Selected Items:<br>");
+        itemstring = ""
+        //populate item list input with comma separated values
+        for(let i = 0; i < items_to_submit.length; i++)
+        {   
+            itemstring += items_to_submit[i];
+            vals = items_to_submit[i].split("x");
+            $("#sel-items").append(item_names[i] + " (#" + vals[0] + ") x" + vals[1]);
+            $("#sel-items").append("<button class='itmdeletebtn' onclick=remove_item(" + i + ")>x</button>");
+            if(i != (items_to_submit.length - 1)){
+                itemstring += ",";
+                $("#sel-items").append("<br>");
+            }
+            $("#items_input").val(itemstring);
+        }
+    }
+    
+    // get item query
+    function getSearchQuery()
+    {
+        $.ajax({
+        url: "{{ url_for('search_item') }}?search=" + $('#searchbox').val(),
+        //force to handle it as text
+        dataType: "text",
+        success: function(data) {
+            var json = $.parseJSON(data);
+            var value = $('#searchbox').val();
+            updateItemList(json, value);
+        }
+        });
+    }
+
+    function updateItemList(data, value)
+    {
+        $('#search_dropdown').html("");
+        for (var i=0; i < data.length; ++i)
+        {
+            // Existing items
+            if(item_names.includes(data[i].name)){
+
+            }else{
+                $('#search_dropdown').append("<button class='entry' itemid='" + data[i].id + "' value='" + data[i].name + "'>#" + data[i].id + ": " + data[i].name + "</button><br>");
+            }
+        }
+        $(".entry").click(
+            function() {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+                // set id input (name, id, quantity)
+                if( $("#search_quantity").val() == ""){
+                    itm_quantity = 1;
+                }else {
+                    itm_quantity = $("#search_quantity").val();
+                }
+                add_item_to_list($(this).val(), $(this).attr("itemid"), itm_quantity);
+                $("#search_quantity").val("1");
+                $(this).remove();
+            }
+        );
+
+    }
+
+    $(function(){
+        $("#item-type").hide();
+        $("#searchbox").keyup(
+            function() {
+                getSearchQuery();
+            }
+        )
+    });
+
+
+</script>
+{% endblock %}

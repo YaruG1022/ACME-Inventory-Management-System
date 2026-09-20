@@ -1,0 +1,102 @@
+/* Add padding to containers */
+.report-container {
+    padding: 16px;
+    background-color: white;
+    margin-left: auto;
+    margin-right: auto;
+    width: 85%;
+}
+
+/* .report-form-container form {
+    width: 25%;
+}
+
+.report-form-container select, label {
+    width: 35%;
+    margin-top: 10px;
+} */
+
+/* Overwrite default styles of hr */
+.report-container hr {
+    border: 1px solid #f1f1f1;
+    margin-bottom: 25px;
+}
+
+/* Style for buttons */
+.report-button {
+    background-color: #4b64d6;
+    color: white;
+    padding: 10px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: auto;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.report-button:hover {
+    background-color: #4b64d6;
+}
+
+/* Style for search bar */
+.report-search {
+    padding: 10px;
+    margin-top: 8px;
+    font-size: 17px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: calc(100% - 44px);
+}
+
+.report-search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    width: 50%;
+}
+
+.report-search-container button {
+    margin-left: 8px;
+}
+
+.reportTable {
+    width: 90%;
+}
+
+/* Style for select elements */
+.report-select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Table styles */
+.report-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.report-container th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.report-container th {
+    background-color: #f2f2f2;
+}
+
+.report-container tr:hover {
+    background-color: #f5f5f5;
+}
+
+th.sortable:hover {
+    cursor: pointer;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+}

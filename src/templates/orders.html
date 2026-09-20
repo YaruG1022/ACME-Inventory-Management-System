@@ -1,0 +1,56 @@
+﻿{% extends 'interface_base.html' %}
+{% block content %}
+    <div class="main">
+        <div class="transaction-buttons">
+            <button class="fa fa-check"> Confirm Order</button>
+            <button class="fa fa-times"> Cancel Order</button>
+            <button class="fa fa-truck"> Mark as Delivered</button>
+            <a href="report.html" style="float: center; padding: 14px 16px;" title="Generate report"><i class="fa fa-file"></i></a>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>ORDER DATE</th>
+                    <th>DELIVERY DATE</th>
+                    <th>STATUS</th>
+                    <th>ITEMS</th>
+                    <th>RECIPIENT</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td>{{ order.orderdate }}</td>
+                        <td>{{ order.deliverydate }}</td>
+                        <td>{{ order.status }}</td>
+                        <td>
+                            <button class="collapsible">{% for item in itemlists[order.id] %}{{ item[0] }}{% if not loop.last %}, {% endif %}{% endfor %}</button>
+                            <div class="collapsible-content">
+                                <p><strong>Order ID:</strong> {{ order.id }}</p>
+                                <p><strong>Items:</strong>{% for item in itemlists[order.id] %}{{ item[0] }} (x {{ item[1] }}){% if not loop.last %}, {% endif %}{% endfor %}</p>
+                            </div>
+                        </td>
+                        <td>{{order.recipient_name}}<br>{{order.recipient_address}}</td>
+                    </tr>
+                {% endfor %}
+                <!-- Add more rows as needed -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            $(".collapsible").click(function() {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                }
+            });
+        });
+    </script>
+{% endblock %}

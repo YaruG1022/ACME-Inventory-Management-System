@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Home</h1>
+    <p>Flask is working.</p>
+    <p>Try out the backend with these pages:</p>
+    <a href="{{ url_for('additem_test_form') }}">Test adding an item to the inventory</a><br>
+    <a href="{{ url_for('listitem_test') }}">View Item list</a><br>
+{% endblock %}

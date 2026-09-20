@@ -1,0 +1,189 @@
+﻿{% extends 'interface_base.html' %}
+{% block content %}
+    <script>
+        /*function getCost() {
+            var mcost = 0;
+            document.getElementById("cost").innerHTML = mcost;
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            loadDonations();
+        });
+
+        function loadDonations() {
+            fetch('/getRecentDonations')  // Update this endpoint to match your server configuration
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('donationTableBody');
+                    data.forEach(donation => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${donation.projectName}</td>
+                            <td>${donation.projectType}</td>
+                            <td>${donation.donator}</td>
+                            <td>${donation.items}</td>
+                            <td>${donation.date}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                });
+        }*/
+    </script>
+
+    <form action="{{ url_for('additem') }}" method="post" enctype="multipart/form-data">
+        <div class="donation-container">
+            <h1>Add donation: </h1>
+            <p>Please fill in this form to add your donation.</p>
+            <hr>
+            
+            
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div class="warning">
+            <p>{{ messages[0] }}</p>
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <label for="item"><b>Search product name/ID: </b></label>
+            <div id="search-div">
+                <input id="searchbox" name="search" autocomplete="off" placeholder="Enter item name/ID">
+                <div id="search_dropdown">
+            
+                </div>
+                <br>
+            </div>
+            <input type="hidden" id="item_id" name="item-id" value="">
+            <input type="hidden" id="item_input" name="item-name" value="">
+            <!-- Only show if new item being created -->
+            <b><p id="sel-item">No item selected.</p></b>
+            <hr>
+            <div id="item-type">
+                <label for="item-type"><b>Product Type: </b></label>
+                <input type="radio" class="itemtype-radio" name="item-type" value="Food"><label for="Food">Food</label>
+                <input type="radio" class="itemtype-radio" name="item-type" value="Hygiene"><label for="Hygiene">Hygiene</label>
+                <br>
+                <br>
+            </div>
+            <div id="donation-date-container">
+                <div class="donation-date">
+                    <label for="stockdate"><b>Stock date:</b></label><br>
+                    <br>
+                    <input type="date" name="stock-date" required>
+                </div>
+                <div class="donation-date">
+                    <label for="expdate"><b>Expiration date:</b></label><br>
+                    <br>
+                    <input type="date" name="expiry-date" required>
+                </div>
+            </div>
+            <br>
+            <hr/>
+            <label for="quantity"><b>Quantity: </b></label>
+            <input type="number" name="item-quantity" id="donation-quantity" required><br>
+            <br>
+            <label for="item-image"><b>Image (optional): </b></label><input type="file" name="item-image">
+            <br><br>
+            <button type="submit" class="create">Add Donation</button>
+        </div>
+    </form>
+
+    <div class="donation-container">
+        <h1>Recent Donations</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Project Name</th>
+                    <th>Type</th>
+                    <th>Donator</th>
+                    <th>Items</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody id="donationTableBody">
+                <!-- Recent donations will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        /* Item search script */
+        function set_item(name, create, id=-1)
+        {
+            if(create == true){
+                $("#item_input").val(name);
+                $("#sel-item").html("New Item: " + name);
+            }else
+            {
+                $("#item_id").val(id);
+                $("#sel-item").html("Selected Item: " + name + " (#" + id + ")");
+            }
+            
+        }
+        
+        // get item query
+        function getSearchQuery()
+        {
+            $.ajax({
+            url: "{{ url_for('search_item') }}?search=" + $('#searchbox').val(),
+            //force to handle it as text
+            dataType: "text",
+            success: function(data) {
+                var json = $.parseJSON(data);
+                var value = $('#searchbox').val();
+                updateItemList(json, value);
+            }
+            });
+        }
+    
+        function updateItemList(data, value)
+        {
+            $('#search_dropdown').html("");
+            for (var i=0; i < data.length; ++i)
+            {
+                // Existing items
+                $('#search_dropdown').append("<button class='entry' itemid='" + data[i].id + "' value='" + data[i].name + "'>#" + data[i].id + ": " + data[i].name + "</button><br>");
+            }
+            if(value != "")
+            {
+                // Create item button
+                $('#search_dropdown').append("<button class='create_item' value='" + value + "'>Create new item: " + value + "</button><br>");
+            }
+            $(".entry").click(
+                function() {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    // set id input
+                    set_item($(this).val(), false, $(this).attr("itemid"));
+                    $(".itemtype-radio").prop('required',false);
+                    $("#item-type").hide();
+                }
+            );
+            $(".create_item").click(
+                function() {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    // set name input
+                    set_item($(this).val(), true);
+                    // show item type options
+                    $(".itemtype-radio").prop('required',true);
+                    $("#item-type").show();
+                }
+            );
+    
+        }
+    
+        $(function(){
+            $("#item-type").hide();
+            $("#searchbox").keyup(
+                function() {
+                    getSearchQuery();
+                }
+            )
+        });
+
+
+    </script>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends 'interface_base.html' %}
+{% block content %}
+<div style="margin: 0 auto; padding: 5px; width: 512px; text-align: center; background-color: rgb(233, 233, 233);">
+    <h1>Set up 2-Factor Authentication</h1>
+    
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="warning">
+        <p>{{ messages[0] }}</p>
+    </div>
+    {% endif %}
+    {% endwith %}
+    
+    <img src= 'data:image/png;base64, {{ current_user.get_2fa_qr_b64() }}' style="box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.5);"/><br>
+    <p><a href='{{ current_user.get_2fa_url() }}'>{{ current_user.get_2fa_url() }}</a></p>
+    <span style="text-align: left;"><p>
+        <ol>
+            <li>If you don't have one, <b>install an authentication app</b> such as:</li>
+                <ul>
+                    <li>Google authenticator <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2">(Android)</a> <a href="https://apps.apple.com/us/app/google-authenticator/id388497605">(iOS)</a></li>
+                    <li>Microsoft authenticator <a href="https://play.google.com/store/apps/details?id=com.azure.authenticator">(Android)</a> <a href="https://apps.apple.com/us/app/microsoft-authenticator/id983156458">(iOS)</a></li>
+                </ul>
+            <li><b>Scan the above QR Code</b> with your authenticator of choice.</li>
+            <li><b>Enter the displayed code below:</b></li>
+        </ol>
+    </p></span>
+    <form id="2fasetupform" action="{{ url_for('login_bp.verify_otp') }}" method="post">
+        <input name="code" placeholder="Enter code...">
+        <input type="submit">
+    </form>
+    <br>
+</div>
+{% endblock %}

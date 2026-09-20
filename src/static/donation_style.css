@@ -1,0 +1,150 @@
+/* Stylesheet for donation.html */
+
+/* Container for the donation form */
+.donation-form-container {
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    max-width: 50%;
+    background-color: #f9f9f9;
+}
+
+/* Heading styles */
+.donation-form-container h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+/* Paragraph styles */
+.donation-form-container p {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+/* Warning message styles */
+.warning {
+    background-color: #ffcccc;
+    padding: 10px;
+    border: 1px solid #ff0000;
+    margin-bottom: 20px;
+}
+
+/* Label styles */
+.donation-form-container label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* Input styles */
+.donation-form-container input[type="text"],
+.donation-form-container input[type="number"],
+.donation-form-container input[type="date"],
+.donation-form-container input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+/* Radio button styles */
+.donation-form-container .itemtype-radio {
+    margin-right: 10px;
+}
+
+/* Search dropdown styles */
+#search-div {
+    position: relative;
+}
+
+#search_dropdown {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-top: none;
+    width: 100%;
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+#search_dropdown .search-dropdown-button {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    background-color: #fff;
+    text-align: left;
+}
+
+#search_dropdown .search-dropdown-button:hover {
+    background-color: #f1f1f1;
+}
+
+/* Item type container styles */
+#item-type {
+    display: none;
+    margin-bottom: 20px;
+}
+
+/* Date container styles */
+#donation-date-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.donation-date {
+    width: 48%;
+}
+
+/* Quantity input styles */
+#donation-quantity {
+    width: calc(100% - 20px);
+}
+
+/* Submit button styles */
+button.donation-submit-button {
+    background-color: skyblue;
+    color: white;
+    padding: 14px 20px;
+    margin: 10px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 3px;
+}
+
+button.donation-submit-button:hover {
+    background-color: #45a049;
+}
+
+/* Recent donations table styles */
+.donation-container {
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    max-width: 800px;
+    background-color: #f9f9f9;
+}
+
+.donation-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.donation-container th,
+.donation-container td {
+    text-align: left;
+    padding: 8px;
+}
+
+.donation-container th {
+    background-color: #f2f2f2;
+}
+
+.donation-container tr:nth-child(even) {
+    background-color: #f9f9f9;
+}

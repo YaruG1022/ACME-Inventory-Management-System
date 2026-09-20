@@ -1,0 +1,342 @@
+﻿{% extends 'interface_base.html' %}
+{% block content %}
+    <div class="inventory-container">
+        <div class="inventory-buttons">
+            <button class="fa fa-plus" onclick="showAddModal()"><alt="Add"> Add</button>
+            <button class="fa fa-edit" onclick="showEditModal()"><alt="Update"> Update</button>
+            <button class="fa fa-remove" onclick="deleteSelectedItems()"><alt="Delete"> Delete</button>
+            <a href="{{ url_for('interface_bp.report_pg') }}" style="float: center; padding: 14px 16px;" title="Generate report"><i class="fa fa-file"></i></a>
+        </div>
+
+        <div class="inventory-search-container">
+            <input type="text" id="searchBar" class="inventory-search" onkeyup="searchItems()" placeholder="Search for items...">
+            <button type="button" class="inventory-search-button" onclick="exactMatchSearch()"><i class="fa fa-search"></i></button>
+        </div>
+
+        <!-- Inventory Table -->
+        <table id="inventoryTable">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th>ID</th>
+                    <th>ITEM NAME</th>
+                    <th>ITEM TYPE</th>
+                    <th>QUANTITY</th>
+                    <th>STOCK DATE</th>
+                    <th>EXPIRATION DATE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><img src="{{ item['image'] }}" alt="Icon" class="icon"></td>
+                        <td>{{ item['id'] }}</td>
+                        <td>{{ item['name'] }}</td>
+                        <td>{{ item['type'] }}</td>
+                        <td>{{ item['quantity'] }}</td>
+                        <td>{{ item['stockdate'] }}</td>
+                        <td>{{ item['expdate'] }}</td>
+                    </tr>
+                {% endfor %}           
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div id="addModal" style="display:none;">
+        <h2>Add Item</h2>
+        <form id="addItemForm" onsubmit="addItem(); return false;">
+            <label for="name">Name:</label>
+            <input type="text" id="addName" name="name" required>
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="addQuantity" name="quantity" required>
+            <label for="category">Category:</label>
+            <input type="text" id="addCategory" name="category" required>
+            <label for="date_added">Date Added:</label>
+            <input type="date" id="addDateAdded" name="date_added" required>
+            <label for="usable_until">Usable Until:</label>
+            <input type="date" id="addUsableUntil" name="usable_until">
+            <label for="status">Status:</label>
+            <input type="text" id="addStatus" name="status">
+            <button type="submit">Add</button>
+        </form>
+    </div>
+
+    <!-- Edit Item Modal -->
+    <div id="editModal" style="display:none;">
+        <h2>Edit Item</h2>
+        <form id="editItemForm" onsubmit="editItem(); return false;">
+            <input type="hidden" id="editId" name="id">
+            <label for="editName">Name:</label>
+            <input type="text" id="editName" name="name" required>
+            <label for="editQuantity">Quantity:</label>
+            <input type="number" id="editQuantity" name="quantity" required>
+            <label for="editCategory">Category:</label>
+            <input type="text" id="editCategory" name="category" required>
+            <label for="editDateAdded">Date Added:</label>
+            <input type="date" id="editDateAdded" name="date_added" required>
+            <label for="editUsableUntil">Usable Until:</label>
+            <input type="date" id="editUsableUntil" name="usable_until">
+            <label for="editStatus">Status:</label>
+            <input type="text" id="editStatus" name="status">
+            <button type="submit">Update</button>
+        </form>
+    </div>
+
+    <script>
+        let currentSortColumn = null;
+        let currentSortOrder = 'asc';
+
+        // Function to fetch and display the inventory data
+        function fetchInventoryData() {
+            fetch(`/getInventoryData`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(Object.keys(data[0]));
+                const tableHead = document.getElementById('inventoryTable').getElementsByTagName('thead')[0];
+                const tableBody = document.getElementById('inventoryTable').getElementsByTagName('tbody')[0];
+
+                // Clear existing headers and rows
+                tableBody.innerHTML = '';
+
+                // Create table headers
+                // This can simply be hardcoded, and in the correct order.
+                /*
+                const headerRow = document.createElement('tr');
+                const checkboxTh = document.createElement('th');
+                headerRow.appendChild(checkboxTh);
+                Object.keys(data[0]).forEach((col, index) => {
+                    const th = document.createElement('th');
+                    th.textContent = col;
+                    th.classList.add('sortable');
+                    th.setAttribute('data-index', index);
+                    th.onclick = () => sortTable(index);
+                    headerRow.appendChild(th);
+                });
+                tableHead.appendChild(headerRow);
+                */
+                // Create table rows
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.dataset.id = row.id; // Add data-id attribute for each row
+                    const checkboxTd = document.createElement('td');
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.classList.add('select-checkbox');
+                    checkboxTd.appendChild(checkbox);
+                    tr.appendChild(checkboxTd);
+                    console.log(row['id']);
+                    rowdata = [row['id'], row['image'], row['name'], row['type'], row['quantity'], row['stockdate'], row['expdate']];
+                    rowdata.forEach(datapoint => {
+                        
+                        new_td = document.createElement('td');
+                        if(datapoint == row['image']){
+                            new_td.innerHTML = "<img src='" + row['image'] + "' alt='Icon' class='icon'>"
+                        }else{
+                            new_td.innerHTML = datapoint;
+                        }
+                        
+                        tr.appendChild(new_td);
+                    })
+                    /*
+                    data.forEach((col, index) => {
+                        const td = document.createElement('td');
+                        td.textContent = row[col];
+                        tr.appendChild(td);
+                    });
+                    */
+                    tableBody.appendChild(tr);
+                });
+            })
+            .catch(error => console.error('Error fetching inventory data:', error));
+        }
+
+        // Function to sort the table
+        function sortTable(columnIndex) {
+            const table = document.getElementById('inventoryTable');
+            const tbody = table.getElementsByTagName('tbody')[0];
+            const rows = Array.from(tbody.getElementsByTagName('tr'));
+            const isAsc = currentSortColumn === columnIndex && currentSortOrder === 'asc';
+
+            rows.sort((a, b) => {
+                const aText = a.getElementsByTagName('td')[columnIndex].textContent.trim().toLowerCase();
+                const bText = b.getElementsByTagName('td')[columnIndex].textContent.trim().toLowerCase();
+
+                if (!isNaN(aText) && !isNaN(bText)) {
+                    // Sort numerically if both values are numbers
+                    return isAsc ? aText - bText : bText - aText;
+                } else {
+                    // Sort as strings
+                    if (aText < bText) return isAsc ? -1 : 1;
+                    if (aText > bText) return isAsc ? 1 : -1;
+                    return 0;
+                }
+            });
+
+            // Append sorted rows back to the table
+            rows.forEach(row => tbody.appendChild(row));
+
+            // Update sorting state
+            currentSortColumn = columnIndex;
+            currentSortOrder = isAsc ? 'desc' : 'asc';
+        }
+
+        // Function to search items in the table
+        function searchItems() {
+            const query = document.getElementById('searchBar').value.toLowerCase().trim();
+            const rows = document.getElementById('inventoryTable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j].innerText.toLowerCase().trim().includes(query)) {
+                        match = true;
+                        break;
+                    }
+                }
+                rows[i].style.display = match ? '' : 'none';
+            }
+        }
+
+        // Function to perform exact match search
+        function exactMatchSearch() {
+            const query = document.getElementById('searchBar').value.toLowerCase().trim();
+            const rows = document.getElementById('inventoryTable').getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j].innerText.toLowerCase().trim() === query) {
+                        match = true;
+                        break;
+                    }
+                }
+                rows[i].style.display = match ? '' : 'none';
+            }
+        }
+
+        // Function to show the add item modal
+        function showAddModal() {
+            document.getElementById('addModal').style.display = 'block';
+        }
+
+        // Function to add an item
+        function addItem() {
+            const form = document.getElementById('addItemForm');
+            const data = {
+                name: form.name.value,
+                quantity: form.quantity.value,
+                category: form.category.value,
+                date_added: form.date_added.value,
+                usable_until: form.usable_until.value,
+                status: form.status.value
+            };
+
+            fetch('/addItem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === 'success') {
+                    fetchInventoryData(); // Refresh the inventory data
+                    form.reset();
+                    document.getElementById('addModal').style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error adding item:', error));
+        }
+
+        // Function to show the edit item modal
+        function showEditModal() {
+            const selectedRows = document.querySelectorAll('.select-checkbox:checked');
+            if (selectedRows.length === 1) {
+                const selectedRow = selectedRows[0].closest('tr');
+                const form = document.getElementById('editItemForm');
+                form.id.value = selectedRow.dataset.id;
+                form.name.value = selectedRow.cells[1].textContent;
+                form.quantity.value = selectedRow.cells[2].textContent;
+                form.category.value = selectedRow.cells[3].textContent;
+                form.date_added.value = selectedRow.cells[4].textContent;
+                form.usable_until.value = selectedRow.cells[5].textContent;
+                form.status.value = selectedRow.cells[6].textContent;
+                document.getElementById('editModal').style.display = 'block';
+            } else {
+                alert('Please select exactly one row to edit.');
+            }
+        }
+
+        // Function to edit an item
+        function editItem() {
+            const form = document.getElementById('editItemForm');
+            const data = {
+                id: form.id.value,
+                name: form.name.value,
+                quantity: form.quantity.value,
+                category: form.category.value,
+                date_added: form.date_added.value,
+                usable_until: form.usable_until.value,
+                status: form.status.value
+            };
+
+            fetch('/updateItem', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === 'success') {
+                    fetchInventoryData(); // Refresh the inventory data
+                    form.reset();
+                    document.getElementById('editModal').style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error updating item:', error));
+        }
+
+        // Function to delete selected items
+        function deleteSelectedItems() {
+            const selectedRows = document.querySelectorAll('.select-checkbox:checked');
+            if (selectedRows.length > 0) {
+                const ids = Array.from(selectedRows).map(row => row.closest('tr').dataset.id);
+                fetch('/deleteItem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ ids: ids })
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === 'success') {
+                        fetchInventoryData(); // Refresh the inventory data
+                    }
+                })
+                .catch(error => console.error('Error deleting items:', error));
+            } else {
+                alert('Please select rows to delete.');
+            }
+        }
+
+        // Add click event to table rows for selection
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchInventoryData();
+            const tableBody = document.getElementById('inventoryTable').getElementsByTagName('tbody')[0];
+            tableBody.addEventListener('click', function(event) {
+                const rows = tableBody.getElementsByTagName('tr');
+                for (let i = 0; i < rows.length; i++) {
+                    rows[i].classList.remove('selected');
+                }
+                event.target.parentNode.classList.add('selected');
+            });
+        });
+    </script>
+{% endblock %}

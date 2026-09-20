@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Login test</h1>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <p>{{ messages[0] }}</p>
+    {% endif %}
+    {% endwith %}
+    <div class='login_form'>
+        <form method='post' action="{{ url_for('login_bp.login') }}">
+            Email: <input type="text" name="email"><br>
+            Password: <input type="password" name="password"><br>
+            <input type="checkbox" name="remember"> Remember Me<br>
+            <input type="submit" value="Submit"><br>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,116 @@
+
+
+.order-form-container {
+    width: 50%;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    background-color: #f9f9f9;
+}
+
+.order-form-container h1, .order-form-container h2 {
+    text-align: center;
+}
+
+.order-form-container hr {
+    margin: 20px 0;
+}
+
+.order-form-container .warning {
+    background-color: #ffdddd;
+    border-left: 6px solid #f44336;
+    margin-bottom: 15px;
+    padding: 10px;
+}
+
+.order-form-container label {
+    font-weight: bold;
+    display: block;
+    margin: 10px 0 5px;
+}
+
+.order-form-container input[type="text"],
+.order-form-container input[type="date"],
+.order-form-container input[type="number"],
+.order-form-container input[type="search"],
+.order-form-container input[type="submit"],
+.order-form-container button {
+    width: 100%;
+    padding: 10px;
+    margin: 5px 0 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.order-form-container #searchbox {
+    width: calc(100% - 60px);
+    display: inline-block;
+}
+
+.order-form-container #search_quantity {
+    width: 50px;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.order-form-container #search-div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.order-form-container #search_dropdown {
+    position: relative;
+}
+
+.order-form-container #search_dropdown .entry {
+    display: block;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-top: 5px;
+    cursor: pointer;
+    width: calc(100% - 20px);
+    text-align: left;
+}
+
+.order-form-container #search_dropdown .entry:hover {
+    background-color: #f1f1f1;
+}
+
+.order-form-container #sel-items {
+    background-color: #f0f0f0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.order-form-container .itmdeletebtn {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.order-form-container .itmdeletebtn:hover {
+    background-color: #e53935;
+}
+
+.order-form-container .create {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 15px;
+    cursor: pointer;
+}
+
+.order-form-container .create:hover {
+    background-color: #45a049;
+}

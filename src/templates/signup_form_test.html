@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Signup test</h1>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <p>{{ messages[0] }}</p>
+    {% endif %}
+    {% endwith %}
+    <div class='signup_form'>
+        <form method='post' action="{{ url_for('login_bp.signup') }}">
+            Email: <input type="text" name="email" required><br>
+            Name: <input type="text" name="name" required><br>
+            Password: <input type="password" name="password" required><br>
+            <input type="submit" value="Submit"><br>
+        </form>
+    </div>
+{% endblock %}

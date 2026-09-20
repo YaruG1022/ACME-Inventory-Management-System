@@ -1,0 +1,21 @@
+{% extends 'interface_base.html' %}
+{% block content %}
+<div style="margin: 0 auto; padding: 5px; width: 480px; text-align: center;">
+    <h1>Verify OTP</h1>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="warning">
+        <p>{{ messages[0] }}</p>
+    </div>
+    {% endif %}
+    {% endwith %}
+    <form id="otp_form" method="post" action="{{ url_for('login_bp.verify_otp') }}">
+        <input id="code" name="code" autocomplete="off" required>
+        <input type="hidden" name="redir" value="{{ redir }}">
+        <input type="hidden" name="remember" value="{{ remember }}">
+        <input type="submit">
+    </form>
+    
+</div>
+
+{% endblock %}
