@@ -1,9 +1,44 @@
 # Development and migration
 
-[Developer guide](developer-guide.md) · [Documentation index](../README.md#documentation)
+[System overview](system-overview.md) · [Documentation index](../README.md#documentation)
 
 Install `.[dev]` and run commands from the repository root. Package configuration,
 dependencies, pytest and lint settings live in pyproject.toml.
+
+## Run and inspect
+
+Follow [README setup](../README.md#setup) for a fresh checkout. For an existing
+database, stop the server and follow [migration and recovery](data-model.md#migration-and-recovery)
+before starting this release. With the virtual environment activated:
+
+```powershell
+python -m flask --app acme_inventory run --port 5055
+```
+
+Open `http://127.0.0.1:5055`. The repository's Codex launch action uses this port;
+plain `flask run` defaults to port 5000. Register an account in a fresh database.
+There are no repository-shipped account credentials or sample inventory.
+
+For a hands-on walkthrough in a disposable instance: create a product, receive two
+batches with different expiry dates, preview an order, confirm it, and fulfill or
+cancel it. Compare the on-hand, reserved and available columns, then inspect
+Movements. Never use a working business database for destructive experiments.
+
+## Where to change a feature
+
+| Concern | Entry points | Useful regression tests |
+| --- | --- | --- |
+| Startup, sessions, CSRF | [factory](../src/acme_inventory/__init__.py), [configuration](../src/acme_inventory/config.py) | [authentication](../tests/test_auth.py), [structure](../tests/test_structure.py) |
+| Products and receipts | [inventory service](../src/acme_inventory/services/inventory.py), [donation routes](../src/acme_inventory/routes/donations.py) | [inventory](../tests/test_inventory.py) |
+| Batches, counts and movement ledger | [stock service](../src/acme_inventory/services/stock.py), [stock routes](../src/acme_inventory/routes/stock.py) | [stock workflows](../tests/test_stock_workflows.py) |
+| Preview, reservation and fulfillment | [order service](../src/acme_inventory/services/orders.py), [order routes](../src/acme_inventory/routes/orders.py) | [orders](../tests/test_orders.py), [stock workflows](../tests/test_stock_workflows.py) |
+| Dashboard and exports | [overview](../src/acme_inventory/services/overview.py), [reports](../src/acme_inventory/services/reports.py) | [overview tests](../tests/test_overview.py), [report tests](../tests/test_reports.py) |
+| Schema and legacy compatibility | [models](../src/acme_inventory/models), [migration](../src/acme_inventory/migrations.py), [CLI](../src/acme_inventory/cli.py) | [legacy import](../tests/test_legacy.py) |
+| UI and interaction | [templates](../src/acme_inventory/templates), [page scripts](../src/acme_inventory/static/js/pages), [shared CSS](../src/acme_inventory/static/css) | [page and asset checks](../tests/test_structure.py), browser walkthrough |
+
+A typical feature change touches a route, a service, its template/page script, and
+behavioral tests. Put balance rules in services rather than duplicating them in JS.
+The browser may preview or filter; the server validates every write again.
 
 ## Configuration
 
@@ -156,3 +191,21 @@ These are local checks, not a claim of a configured CI/CD deployment pipeline.
 For documentation-only changes, verify relative links, Mermaid syntax, model/route
 names and diagram semantics against source. Do not run migrations or modify business
 data just to preview documentation.
+
+
+## Implementation notes for stock changes
+
+Stock writes and ledger entries must commit together. Do not update only the
+compatibility `Item.quantity` field or bypass stock services. Supported API writes
+require clients to supply `request_key` to receive replay protection; see the
+[endpoint reference](#batch-inventory-release). FEFO breaks equal-expiry ties by
+batch ID. Preserve these details when changing allocation behavior.
+
+## Maintaining the documentation
+
+Update the owning document in the same change as a modified module, relationship,
+state transition or deployment assumption. Use meaningful arrow labels and keep
+static dependencies separate from runtime sequences. The ER diagram shows declared
+relationships; consult models and migrations for full schema details. Add a short
+architectural decision record when a substantial tradeoff changes (for example,
+replacing SQLite), rather than expanding every diagram.

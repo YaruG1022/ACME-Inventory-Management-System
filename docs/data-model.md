@@ -1,6 +1,6 @@
 # Inventory data model
 
-[Developer guide](developer-guide.md) · [Documentation index](../README.md#documentation)
+[System overview](system-overview.md) · [Documentation index](../README.md#documentation)
 
 The application retains the original `user`, `item`, and `order` tables and adds
 normalized business tables through the versioned SQLite migration in migrations.py.

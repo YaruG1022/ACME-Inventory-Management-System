@@ -1,6 +1,6 @@
 # Business workflows
 
-[Developer guide](developer-guide.md) · [Documentation index](../README.md#documentation)
+[System overview](system-overview.md) · [Documentation index](../README.md#documentation)
 
 ## Products and units
 

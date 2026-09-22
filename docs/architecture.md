@@ -1,6 +1,6 @@
 # Architecture and naming
 
-[Developer guide](developer-guide.md) · [Documentation index](../README.md#documentation)
+[System overview](system-overview.md) · [Documentation index](../README.md#documentation)
 
 The application is a modular Flask monolith. `create_app` loads configuration,
 binds shared extensions, and registers routes and CLI commands. Importing the
@@ -119,7 +119,7 @@ This is a responsibility map, not an exhaustive Python import graph. In particul
 `Item.serialize()` delegates calculated balances to `stock_summary`; authentication
 routes also access user models directly. The factory creates the instance directory
 and may create a local signing secret, but database initialization is an explicit CLI
-operation. See [developer code map](developer-guide.md#where-to-change-a-feature).
+operation. See [code map](development.md#where-to-change-a-feature).
 
 ## Page navigation
 

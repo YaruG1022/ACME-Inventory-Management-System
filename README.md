@@ -3,11 +3,12 @@
 A Flask application for tracking donated food and hygiene products, recipient
 orders, and inventory reports. Originally created for WSU SU21 CPTS 322.
 
-## Developer orientation
+## System overview
 
-Start with the [developer guide](docs/developer-guide.md) for a reading path, code
-map, architecture diagrams, ER model, state machines, transaction sequences and
-local deployment. Diagram sources are maintained as Mermaid inside Markdown.
+Start with the [system overview](docs/system-overview.md) to understand the app's
+purpose, terminology, workflows, structure and limits. It directs operators,
+project stakeholders, testers, developers and maintainers to the relevant topic
+documents. Diagrams are maintained as Mermaid inside Markdown.
 
 ## Setup
 
@@ -98,7 +99,7 @@ back up instance data. Do not disable the firewall to expose the app.
 
 ## Documentation
 
-- [Developer guide and reading order](docs/developer-guide.md)
+- [System overview and documentation navigation](docs/system-overview.md)
 
 - [Architecture and naming](docs/architecture.md)
 - [Data model and compatibility](docs/data-model.md)
