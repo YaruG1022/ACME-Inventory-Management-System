@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+from datetime import date
 
 from acme_inventory.extensions import db
 from acme_inventory.models import Item, Order
@@ -8,7 +9,7 @@ from acme_inventory.services.orders import create_order
 def order_data(lines):
     return {
         "items": lines,
-        "ordered_on": "2026-09-20",
+        "ordered_on": date.today().isoformat(),
         "recipient_name": "Recipient",
         "recipient_address": "123 Main Street",
     }
@@ -28,7 +29,8 @@ def test_order_aggregates_lines_and_protects_history(api, item_data):
     )
     assert response.status_code == 201
     assert response.json["items"] == f"{item['id']}x5"
-    assert api("GET", "/api/items").json[0]["quantity"] == 5
+    assert api("GET", "/api/items").json[0]["quantity"] == 10
+    assert api("GET", "/api/items").json[0]["available"] == 5
     assert api("POST", "/api/items/delete", {"ids": [item["id"]]}).status_code == 400
 
 
@@ -76,5 +78,6 @@ def test_concurrent_orders_cannot_both_spend_same_stock(app, api, item_data):
         results = list(executor.map(lambda _: submit(), range(2)))
     assert sorted(results) == [False, True]
     with app.app_context():
-        assert db.session.get(Item, item["id"]).quantity == 3
+        assert db.session.get(Item, item["id"]).serialize()["available"] == 3
+        assert db.session.get(Item, item["id"]).quantity == 10
         assert db.session.scalar(db.select(db.func.count()).select_from(Order)) == 1

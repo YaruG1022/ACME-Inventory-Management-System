@@ -125,3 +125,13 @@ dialog h2 { font-size:21px; }.dialog-actions { border-top:1px solid var(--line);
 th { color:#65766a; }
 input::placeholder { color:#718075; }
 .panel-footer,.cell-secondary,.summary-footnote { color:#69796e; }
+/* Operational controls share the existing workspace visual language. */
+#batch-filters, #movement-filters { align-items:end; flex-wrap:wrap; }
+#batch-filters label, #movement-filters label { flex:1; min-width:130px; }
+#batch-filters input, #movement-filters input { width:100%; }
+#order-preview p { margin:10px 0 0; }
+.form-actions { flex-wrap:wrap; }
+#batch-table td:first-child, #movement-table td:nth-child(2) { min-width:190px; white-space:normal; }
+#movement-table td:nth-child(7) { min-width:170px; white-space:normal; }
+
+#main-content > .toolbar { margin-bottom:20px; }

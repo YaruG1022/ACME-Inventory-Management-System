@@ -1,3 +1,5 @@
+from datetime import date, timedelta
+
 import pytest
 
 from acme_inventory import create_app
@@ -66,6 +68,6 @@ def item_data():
         "name": "Rice",
         "category": "Food",
         "quantity": 10,
-        "received_on": "2026-09-20",
-        "expires_on": "2027-09-20",
+        "received_on": date.today().isoformat(),
+        "expires_on": (date.today() + timedelta(days=365)).isoformat(),
     }

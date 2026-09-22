@@ -4,8 +4,8 @@
   <nav aria-label="Main navigation">
     <p class="nav-heading">WORKSPACE</p>
     {% if current_user.is_authenticated %}
-      {% for endpoint, label, glyph in [('home.index', 'Overview', 'grid'), ('inventory.index', 'Inventory', 'box'), ('donations.create_page', 'Donations', 'receive'), ('orders.index', 'Orders', 'orders'), ('reports.index', 'Reports', 'chart')] %}
-      <a href="{{ url_for(endpoint) }}" {% if request.blueprint == endpoint.split('.')[0] %}aria-current="page"{% endif %}>{{ icon(glyph) }}<span>{{ label }}</span></a>
+      {% for endpoint, label, glyph in [('home.index', 'Overview', 'grid'), ('inventory.index', 'Inventory', 'box'), ('stock.index', 'Batches & stock', 'box'), ('stock.movements_page', 'Movements', 'chart'), ('donations.create_page', 'Donations', 'receive'), ('orders.index', 'Orders', 'orders'), ('reports.index', 'Reports', 'chart')] %}
+      <a href="{{ url_for(endpoint) }}" {% if (request.endpoint == endpoint if endpoint.startswith('stock.') else request.blueprint == endpoint.split('.')[0]) %}aria-current="page"{% endif %}>{{ icon(glyph) }}<span>{{ label }}</span></a>
       {% endfor %}
       <p class="nav-heading settings-heading">MANAGE</p>
       <a href="{{ url_for('account.profile') }}" {% if request.blueprint == 'account' %}aria-current="page"{% endif %}>{{ icon('user') }}<span>Account</span></a>

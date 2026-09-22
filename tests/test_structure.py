@@ -9,6 +9,8 @@ def test_pages_and_linked_assets(authenticated):
         "/",
         "/home",
         "/inventory",
+        "/stock",
+        "/movements",
         "/add_donation",
         "/orders",
         "/add_order",

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">BATCH CONTROL</p><h1>Batches & stock</h1><p class="subtitle">Trace every receipt. Keep expired and reserved stock out of available supplies.</p></div><a class="button" href="{{ url_for('donations.create_page') }}">{{ icon('plus', 18) }} Receive stock</a></div>
+<div class="toolbar"><a class="button secondary" href="{{ url_for('inventory.index', status='low') }}">Below minimum stock</a><a class="button secondary" href="{{ url_for('stock.movements_page') }}">View stock movements</a></div>
+<section class="panel" id="batch-page">
+<div class="panel-heading"><div><h2>Stock by batch</h2><p>Available stock excludes reservations, quarantine, and expired batches.</p></div></div>
+<form id="batch-filters" class="toolbar table-toolbar">
+<label>Product <select name="item_id"><option value="">All products</option>{% for item in items %}<option value="{{ item.id }}">{{ item.sku }} · {{ item.name }}</option>{% endfor %}</select></label>
+<label>View <select name="view"><option value="all">All batches</option><option value="expiring">Expiring soon</option><option value="expired">Expired stock</option><option value="quarantine">Quarantined</option></select></label>
+<label>Within days <input name="days" type="number" min="0" max="3650" value="7"></label>
+<label>Category <select name="category"><option value="">All categories</option><option>Food</option><option>Hygiene</option></select></label><button type="submit" class="secondary">Apply filters</button>
+</form>
+<div class="table-scroll"><table id="batch-table"><thead><tr><th>Product / batch</th><th>Source</th><th>On hand</th><th>Reserved</th><th>Available</th><th>Received</th><th>Expires</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table></div>
+<div id="batch-empty" class="empty-state" hidden><h3>No matching batches</h3><p>Receive stock or adjust the filters.</p></div><div class="panel-footer"><span id="batch-count" role="status">Loading batches…</span><span>Quantities use each product's base unit</span></div>
+</section>
+<dialog id="batch-dialog"><form id="batch-form" class="stack"><h2 id="batch-title">Manage batch</h2><p id="batch-context" class="subtitle"></p>
+<label>Operation <select name="action"><option value="count">Physical count</option><option value="dispose">Dispose / write off</option><option value="quarantine">Quarantine batch</option><option value="release">Release quarantine</option></select></label>
+<label id="count-field">Actual on-hand quantity <input name="counted_quantity" type="number" min="0" step="1"></label>
+<label id="dispose-field" hidden>Quantity to remove <input name="quantity" type="number" min="1" step="1"></label>
+<label>Reason / reference <input name="reason" maxlength="255" placeholder="e.g. monthly stocktake, damaged packaging" required></label>
+<p class="subtitle">A physical count is the total you counted, not an amount to add. Reserved stock must be released by cancelling its order before it can be disposed of or quarantined.</p>
+<p id="batch-error" class="notice error" hidden role="alert"></p><div class="toolbar"><button type="button" id="close-batch" class="secondary">Cancel</button><button type="submit">Record change</button></div>
+</form></dialog>
+{% endblock %}
+{% block scripts %}<script type="module" src="{{ url_for('static', filename='js/pages/stock.js') }}"></script>{% endblock %}

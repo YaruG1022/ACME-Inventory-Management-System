@@ -5,7 +5,7 @@ import pyotp
 
 from acme_inventory import create_app
 from acme_inventory.extensions import bcrypt, db
-from acme_inventory.models import Item, Order, User
+from acme_inventory.models import Item, Order, StockBatch, StockMovement, User
 
 
 def test_import_preserves_old_schema_and_source(tmp_path, monkeypatch):
@@ -61,10 +61,23 @@ def test_import_preserves_old_schema_and_source(tmp_path, monkeypatch):
         assert db.session.get(Item, 1).quantity == 7
         assert db.session.get(Item, 1).image_url == "/static/images/placeholder.svg"
         assert db.session.get(Order, 1).items == "1x3"
+        assert db.session.get(Order, 1).status == "Legacy recorded"
+        assert db.session.get(Order, 1).legacy_status == "Confirmed"
+        assert db.session.get(Order, 1).lines[0].quantity == 3
+        assert db.session.scalar(db.select(StockBatch)).quantity == 7
+        assert db.session.scalar(db.select(StockMovement)).delta == 7
         db.session.remove()
         db.engine.dispose()
     assert (
         Path(app.config["UPLOAD_DIR"]) / "legacy/profiles/avatar.png"
     ).read_bytes() == b"old-image"
+    assert runner.invoke(args=["upgrade-db"]).exit_code == 0
+    assert runner.invoke(args=["upgrade-db"]).exit_code == 0
+    with app.app_context():
+        assert db.session.scalar(db.select(db.func.count()).select_from(StockBatch)) == 1
+        assert db.session.scalar(db.select(db.func.count()).select_from(StockMovement)) == 1
+        assert db.session.get(Item, 1).quantity == 7
+        db.session.remove()
+        db.engine.dispose()
     assert runner.invoke(args=args).exit_code != 0
     assert source.read_bytes() == original

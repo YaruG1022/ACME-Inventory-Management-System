@@ -2,7 +2,8 @@ from flask import Blueprint, jsonify, render_template, request
 from flask_login import login_required
 
 from ..services import inventory
-from ..services.validation import integer
+from ..services.stock import stock_summary
+from ..services.validation import integer, parse_date
 from .common import json_object, validation_errors
 
 bp = Blueprint("inventory", __name__)
@@ -16,9 +17,23 @@ def index():
 
 @bp.get("/api/items")
 @login_required
+@validation_errors
 def list_items():
+    when = request.args.get("on_date")
+    records = inventory.list_items(
+        request.args.get("search", ""),
+        request.args.get("category"),
+        request.args.get("status"),
+        when,
+    )
     return jsonify(
-        [item.serialize() for item in inventory.list_items(request.args.get("search", ""))]
+        [
+            {
+                **item.serialize(),
+                **stock_summary(item, parse_date(when, "Availability date") if when else None),
+            }
+            for item in records
+        ]
     )
 
 

@@ -12,10 +12,23 @@ def test_create_search_edit_zero_and_delete(api, item_data):
     assert api("GET", "/api/items?search=Rice").json[0]["category"] == "Food"
     assert api("GET", "/api/items?search=missing").json == []
     updated = api("PUT", f"/api/items/{item_id}", {**item_data, "quantity": 0})
+    assert updated.status_code == 400  # Counts now require a batch and an audit reason.
+    batch = api("GET", f"/api/batches?item_id={item_id}").json[0]
+    updated = api(
+        "POST",
+        f"/api/batches/{batch['id']}/adjust",
+        {
+            "action": "count",
+            "counted_quantity": 0,
+            "expected_quantity": 10,
+            "reason": "Physical stocktake",
+        },
+    )
     assert updated.status_code == 200
-    assert updated.json["quantity"] == 0
-    assert api("POST", "/api/items/delete", {"ids": [item_id]}).status_code == 200
-    assert api("GET", "/api/items").json == []
+    assert api("GET", "/api/items").json[0]["quantity"] == 0
+    assert api("POST", "/api/items/delete", {"ids": [item_id]}).status_code == 400
+    empty = api("POST", "/api/items", {"name": "Unused", "category": "Food"}).json
+    assert api("POST", "/api/items/delete", {"ids": [empty["id"]]}).status_code == 200
 
 
 def test_invalid_mutations_leave_stock_unchanged(api, item_data):

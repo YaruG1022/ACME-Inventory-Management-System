@@ -1,3 +1,5 @@
+import secrets
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required
 
@@ -10,7 +12,12 @@ bp = Blueprint("donations", __name__)
 @bp.get("/add_donation")
 @login_required
 def create_page():
-    return render_template("donations/create.html", title="Add donation", items=list_items())
+    return render_template(
+        "donations/create.html",
+        title="Add donation",
+        items=list_items(),
+        request_key=secrets.token_urlsafe(24),
+    )
 
 
 @bp.post("/additem")

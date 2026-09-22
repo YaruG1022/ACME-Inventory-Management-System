@@ -9,6 +9,7 @@ from flask import current_app
 from sqlalchemy.engine import make_url
 
 from .extensions import db
+from .migrations import upgrade_database
 from .models import Item, User
 
 
@@ -16,8 +17,14 @@ def register_commands(app):
     @app.cli.command("init-db")
     def init_db():
         """Create missing tables without deleting existing data."""
-        db.create_all()
+        upgrade_database()
         click.echo("Database tables are ready.")
+
+    @app.cli.command("upgrade-db")
+    def upgrade_db():
+        """Back up and migrate inventory, batches, and historical orders."""
+        backup = upgrade_database()
+        click.echo(f"Database upgraded. Backup: {backup}" if backup else "Database is up to date.")
 
     @app.cli.command("import-legacy")
     @click.option(
@@ -50,6 +57,7 @@ def register_commands(app):
                 source.backup(destination_connection)
         if images:
             shutil.copytree(images, destination)
+        upgrade_database()
 
         def image_url(value, fallback):
             normalized = (value or "").replace("\\", "/").lstrip("/")

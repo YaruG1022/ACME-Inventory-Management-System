@@ -15,13 +15,11 @@ if ([...status.options].some(option => option.value === requestedStatus)) status
 let items = [];
 
 function stockStatus(item) {
-  const now = new Date();
-  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-  const days = (Date.parse(item.expires_on) - today) / 86400000;
-  if (item.quantity === 0) return { key: 'out', label: 'Out of stock', style: 'neutral' };
-  if (days < 0) return { key: 'expired', label: 'Expired', style: 'danger-badge' };
-  if (days <= 7) return { key: 'expiring', label: 'Expiring soon', style: 'warning' };
-  return { key: 'available', label: 'In stock', style: '' };
+  if (item.expired > 0) return { key: 'expired', label: 'Expired stock', style: 'danger-badge' };
+  if (item.expiring > 0) return { key: 'expiring', label: 'Expiring soon', style: 'warning' };
+  if (item.available === 0) return { key: 'out', label: 'Unavailable', style: 'neutral' };
+  if (item.low_stock) return { key: 'low', label: 'Below minimum', style: 'warning' };
+  return { key: 'available', label: 'Available', style: '' };
 }
 
 function selectedIds() {
@@ -40,9 +38,9 @@ function render() {
   const body = table.tBodies[0];
   body.replaceChildren();
   const visible = items.filter(item =>
-    matchesSearch([item.id, item.name, item.category], search.value)
+    matchesSearch([item.id, item.sku, item.aliases, item.name, item.category], search.value)
     && (!category.value || item.category === category.value)
-    && (!status.value || (status.value === 'available' ? item.quantity > 0 : stockStatus(item).key === status.value))
+    && (!status.value || ({available: item.available > 0, out: item.available === 0, low: item.low_stock, expired: item.expired > 0, expiring: item.expiring > 0}[status.value]))
   );
   for (const item of visible) {
     const row = document.createElement('tr');
@@ -59,11 +57,12 @@ function render() {
     image.alt = '';
     imageCell.append(image);
     row.append(selection, imageCell);
-    for (const key of ['id', 'name', 'category', 'quantity', 'received_on', 'expires_on']) {
+    for (const key of ['sku', 'name', 'category', 'on_hand', 'reserved', 'available', 'unit']) {
       const cell = textCell(item[key]);
-      if (key === 'quantity') cell.className = 'numeric';
+      if (['on_hand', 'reserved', 'available'].includes(key)) cell.className = 'numeric';
       if (key === 'id') { cell.className = 'reference'; cell.textContent = `#${String(item.id).padStart(4, '0')}`; }
-      if (key === 'name') { const name = document.createElement('strong'); name.textContent = item.name; cell.replaceChildren(name); }
+      if (key === 'name') { const name = document.createElement('a'); name.textContent = item.name; name.href = `/stock?item_id=${item.id}`; cell.replaceChildren(name); }
+      if (key === 'unit') cell.textContent = `${item.unit} / ${item.minimum_stock}`;
       if (key === 'category') {
         const tag = document.createElement('span');
         tag.className = `category-tag ${item.category === 'Hygiene' ? 'hygiene' : ''}`;
@@ -84,9 +83,9 @@ function render() {
   table.querySelectorAll('th').forEach(th => th.removeAttribute('aria-sort'));
   document.getElementById('inventory-empty').hidden = visible.length > 0;
   document.getElementById('inventory-count').textContent = `${visible.length} of ${items.length} products`;
-  const counts = { total: items.length, available: items.filter(item => item.quantity > 0).length,
-    expiring: items.filter(item => stockStatus(item).key === 'expiring').length,
-    out: items.filter(item => item.quantity === 0).length };
+  const counts = { total: items.length, available: items.filter(item => item.available > 0).length,
+    expiring: items.filter(item => item.expiring > 0).length,
+    out: items.filter(item => item.available === 0).length };
   for (const [key, value] of Object.entries(counts)) document.getElementById(`count-${key}`).textContent = value;
   updateButtons();
 }
@@ -98,11 +97,12 @@ async function load() {
 
 function openForm(item = {}) {
   form.reset();
-  for (const key of ['id', 'name', 'category', 'quantity', 'received_on', 'expires_on']) {
+  for (const key of ['id', 'name', 'sku', 'category', 'unit', 'minimum_stock', 'aliases']) {
     if (item[key] !== undefined) form.elements.namedItem(key).value = item[key];
   }
   document.getElementById('item-form-title').textContent = item.id ? 'Edit item' : 'Add item';
   document.getElementById('item-error').hidden = true;
+  form.dataset.requestKey = crypto.randomUUID();
   dialog.showModal();
 }
 
@@ -121,6 +121,7 @@ form.addEventListener('submit', async event => {
   const data = Object.fromEntries(new FormData(form));
   const id = data.id;
   delete data.id;
+  if (!id) data.request_key = form.dataset.requestKey;
   const button = form.querySelector('button[type="submit"]');
   button.disabled = true;
   try {
