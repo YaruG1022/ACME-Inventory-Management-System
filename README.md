@@ -1,5 +1,7 @@
 # ACME Food Bank Inventory Tracking System
 
+**English** | [简体中文](README.zh-CN.md)
+
 A Flask application for tracking donated food and hygiene products, recipient
 orders, and inventory reports. Originally created for WSU SU21 CPTS 322.
 

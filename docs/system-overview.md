@@ -1,5 +1,7 @@
 # ACME Inventory System Overview
 
+**English** | [简体中文](system-overview.zh-CN.md)
+
 ACME supports food-bank operations from receiving donated supplies to distributing
 them to recipients. It tracks stock by batch, reserves supplies for orders, and
 records stock changes so the team can understand both current balances and their history.
