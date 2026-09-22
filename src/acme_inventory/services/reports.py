@@ -5,13 +5,56 @@ import xlsxwriter
 
 from .inventory import list_items
 from .orders import list_orders
+from .stock import list_batches, list_movements
 
 REPORT_COLUMNS = {
-    "inventory": ["id", "name", "category", "quantity", "received_on", "expires_on", "image_url"],
+    "inventory": [
+        "id",
+        "sku",
+        "name",
+        "category",
+        "unit",
+        "on_hand",
+        "reserved",
+        "available",
+        "minimum_stock",
+        "low_stock",
+        "image_url",
+    ],
+    "batches": [
+        "id",
+        "sku",
+        "name",
+        "code",
+        "unit",
+        "quantity",
+        "reserved",
+        "received_on",
+        "expires_on",
+        "status",
+        "source",
+    ],
+    "movements": [
+        "id",
+        "created_at",
+        "sku",
+        "name",
+        "batch",
+        "kind",
+        "delta",
+        "reserved_delta",
+        "balance",
+        "reserved_balance",
+        "unit",
+        "reason",
+        "actor",
+        "order_id",
+    ],
     "orders": [
         "id",
         "ordered_on",
         "delivered_on",
+        "scheduled_on",
         "status",
         "items",
         "recipient_name",
@@ -23,7 +66,12 @@ REPORT_COLUMNS = {
 def report_data(report_type):
     if report_type not in REPORT_COLUMNS:
         raise ValueError("Choose a valid report type.")
-    rows = list_items() if report_type == "inventory" else list_orders()
+    rows = {
+        "inventory": list_items,
+        "orders": list_orders,
+        "batches": list_batches,
+        "movements": list_movements,
+    }[report_type]()
     return {"columns": REPORT_COLUMNS[report_type], "data": [row.serialize() for row in rows]}
 
 

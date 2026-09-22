@@ -3,7 +3,7 @@ from zipfile import ZipFile
 
 
 def test_empty_report_and_both_export_formats(api):
-    for report_type in ("inventory", "orders"):
+    for report_type in ("inventory", "orders", "batches", "movements"):
         response = api("GET", f"/api/reports?report_type={report_type}")
         assert response.status_code == 200
         assert response.json["columns"]
