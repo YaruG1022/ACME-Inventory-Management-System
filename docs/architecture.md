@@ -7,8 +7,10 @@ package does not create database tables or start a server.
 Request flow: route → service → model/database. Routes handle HTTP input and access
 checks. Services validate business rules and own commit/rollback boundaries.
 Models describe persisted data and serialization; they do not commit transactions.
-Order creation and all stock deductions commit together, using conditional SQL
-updates to prevent stale-balance deductions.
+Stock mutations acquire a SQLite writer lock before reading balances. Batch
+changes, reservations, normalized order lines and movement history commit together.
+The services/stock.py module owns shared stock summaries and transaction helpers.
+Versioned schema and data upgrades live in migrations.py.
 
 Python files/functions/fields use snake_case, classes use PascalCase, constants
 use UPPER_SNAKE_CASE. JavaScript functions use camelCase and CSS uses kebab-case.
@@ -31,14 +33,14 @@ before they have a concrete responsibility. Add domain modules as features grow.
 
 The workspace uses a persistent desktop sidebar and a compact mobile navigation
  grid, a shared page header, reusable metric cards, and consistent forms and tables.
-The authenticated overview shows real product counts, expiration alerts, category
+The authenticated overview shows real product counts, batch expiration alerts, category
 mix, and recent orders; the public home page does not expose inventory information.
 
 Inventory filters combine product search, category, and stock status. “Expiring
 soon” means stock on hand with an expiration date from today through seven days
 from today, inclusive. “Expired” excludes products with zero quantity. “In stock”
-means a positive physical balance, not a guarantee that the product is fit to
-issue. Status is communicated with text as well as color. Overview cards link to
+in the inventory filter means positive eligible unreserved stock. Physical on-hand
+and reserved amounts are shown separately. Status is communicated with text as well as color. Overview cards link to
 corresponding inventory filters. No sample records are added to the user's database.
 
 Shared colors and layout live in static/css/base.css; components and responsive

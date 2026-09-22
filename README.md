@@ -20,22 +20,24 @@ On macOS/Linux, activate with `source .venv/bin/activate` and copy configuration
 with `cp .env.example .env`. Open http://127.0.0.1:5000 and register a local account.
 No default account or password is created.
 
-Imports do not create database tables. `init-db` creates missing tables without
-clearing existing ones; it is not a schema migration command. Local data, secrets,
+Imports do not create database tables. `init-db` initializes a fresh database and applies the versioned schema upgrade.
+For existing installations, stop the server and run `flask --app acme_inventory upgrade-db`.
+The SQLite upgrade creates a timestamped backup alongside the database before making changes. Local data, secrets,
 and uploads live in Flask's instance directory, outside the application package.
 Set `ACME_INSTANCE_PATH` in `.env` to select a specific absolute directory.
 
 ## Features
 
 - Registration, login, logout, profile/password updates, authenticator-based 2FA.
-- Inventory listing, filtering, sorting, creating, editing, and protected deletion.
-- Receiving donations into new/existing items, with optional image uploads.
-- Recipient orders with atomic stock deductions and validation.
-- Inventory/order report previews and CSV/XLSX exports.
+- Products with unique SKUs, aliases, fixed base units, and minimum stock thresholds.
+- Separate receipt batches with source, expiry, on-hand and reserved quantities.
+- Order availability preview, FEFO allocation, reservations, cancellation and fulfillment.
+- Audited physical counts, disposal, quarantine/release, and stock movement history.
+- Low-stock and expiration filters, plus inventory/order/batch/movement CSV/XLSX exports.
 
-Each item still has a single balance and expiration date; replenishment updates
-its dates. Batches, locations, reservations, cancellation workflows, and role-based
-permissions are future work. All registered users have the same operational access.
+Quantities are whole numbers in each product's base unit; there is no unit conversion.
+Locations, purchasing, demand forecasting and role-based permissions remain out of scope.
+All registered users have the same operational access. No Agent or model training is included.
 Public registration is intended for the course/demo workflow and should be reviewed
 before public deployment.
 
@@ -51,7 +53,9 @@ python -m flask --app acme_inventory import-legacy --database src/data/inventory
 Use absolute source paths when importing from another checkout. The command copies
 the database and optional images, rewrites image URLs in the copy, and leaves the
 originals untouched. It refuses to overwrite an existing destination database.
-Users, password hashes, 2FA secrets, items, and orders remain compatible. Users must
+Users, password hashes and 2FA secrets are preserved. Current balances become opening
+batches. Historical orders are retained as read-only `Legacy recorded` entries, with
+their original status preserved; no historical stock is deducted a second time. Users must
 log in again. See [development notes](docs/development.md).
 
 ## Structure
@@ -61,7 +65,8 @@ src/acme_inventory/
   __init__.py       application factory
   config.py        runtime configuration
   extensions.py    shared Flask extensions
-  cli.py           initialization and legacy import
+  cli.py           initialization, upgrade and legacy import
+  migrations.py    versioned SQLite schema/data migration
   models/          database mappings
   routes/          HTTP endpoints and access checks
   services/        business operations and integrations
