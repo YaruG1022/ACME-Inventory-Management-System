@@ -1,5 +1,7 @@
 # Development and migration
 
+[Developer guide](developer-guide.md) · [Documentation index](../README.md#documentation)
+
 Install `.[dev]` and run commands from the repository root. Package configuration,
 dependencies, pytest and lint settings live in pyproject.toml.
 
@@ -88,3 +90,69 @@ mechanism. The APIs are application endpoints; no Agent layer is included.
 Tests cover expiry boundaries, FEFO allocation, independent lots, reservations,
 cancellation, fulfillment, replay protection, concurrent writes, stale physical
 counts, protected history, migration re-entry, page assets and all report formats.
+
+## Local deployment
+
+This is the current development environment, not a production deployment claim.
+Arrows name protocols or file access. The CLI initialization/migration step is
+explicit; starting the server alone does not upgrade tables.
+
+```mermaid
+flowchart TB
+    subgraph Machine["Developer workstation"]
+        Browser["Browser"]
+        Launcher["Terminal or Codex launch action"]
+        Server["Virtual environment: Python and Flask development server"]
+        CLI["Flask CLI: init-db or upgrade-db"]
+        Repo["Checkout: src/acme_inventory, templates and static assets"]
+        Config["Process environment and optional .env"]
+        subgraph Runtime["Private runtime storage, configurable paths"]
+            DB[("inventory.db")]
+            Images["uploads directory"]
+            Secret["secret.txt fallback"]
+            Backup["Timestamped migration backup"]
+        end
+        Launcher -->|Start on port 5055| Server
+        Browser -->|HTTP to 127.0.0.1:5055| Server
+        Server -->|Loads code and assets| Repo
+        Config -->|Application settings| Server
+        Config -->|Database location| CLI
+        Server -->|SQLite file access| DB
+        Server -->|Image file access| Images
+        Server -->|Read or create when no configured secret| Secret
+        CLI -->|Create or migrate schema and data| DB
+        CLI -->|Back up existing SQLite database before upgrade| Backup
+    end
+```
+
+The default paths are resolved from Flask's `app.instance_path`, not hard-coded to
+the working directory. In this editable source layout that is normally `src/instance`.
+`ACME_DATABASE_URL` and `ACME_UPLOAD_DIR` can override their locations independently.
+The signing secret may come from `ACME_SECRET_KEY` instead of a file. Keep actual
+credentials and database backups out of Git; `.env.example` documents variable names.
+
+For production, a WSGI server, HTTPS termination, access policy and backup operations
+need their own deployment design. No such infrastructure is provisioned here. A
+Git revert changes tracked code; it does not reverse database migration or stock
+operations. See [data recovery](data-model.md#migration-and-recovery).
+
+## Verifying a development change
+
+Run commands from the repository root with the virtual environment activated:
+
+```powershell
+python -m pytest
+python -m ruff check src/acme_inventory tests
+python -m build
+```
+
+Tests use temporary databases through [fixtures](../tests/conftest.py). Use
+[stock workflow tests](../tests/test_stock_workflows.py) for inventory invariants,
+[order tests](../tests/test_orders.py) for concurrent reservations, and
+[legacy tests](../tests/test_legacy.py) for migration compatibility. UI changes also
+need a browser walkthrough: asset/HTTP tests do not execute JavaScript interactions.
+These are local checks, not a claim of a configured CI/CD deployment pipeline.
+
+For documentation-only changes, verify relative links, Mermaid syntax, model/route
+names and diagram semantics against source. Do not run migrations or modify business
+data just to preview documentation.

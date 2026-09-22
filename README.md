@@ -3,6 +3,12 @@
 A Flask application for tracking donated food and hygiene products, recipient
 orders, and inventory reports. Originally created for WSU SU21 CPTS 322.
 
+## Developer orientation
+
+Start with the [developer guide](docs/developer-guide.md) for a reading path, code
+map, architecture diagrams, ER model, state machines, transaction sequences and
+local deployment. Diagram sources are maintained as Mermaid inside Markdown.
+
 ## Setup
 
 Python 3.10 or newer is required. From the repository root:
@@ -91,6 +97,8 @@ terminate HTTPS at a reverse proxy, configure a stable `ACME_SECRET_KEY`, and
 back up instance data. Do not disable the firewall to expose the app.
 
 ## Documentation
+
+- [Developer guide and reading order](docs/developer-guide.md)
 
 - [Architecture and naming](docs/architecture.md)
 - [Data model and compatibility](docs/data-model.md)

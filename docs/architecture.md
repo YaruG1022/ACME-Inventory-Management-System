@@ -1,5 +1,7 @@
 # Architecture and naming
 
+[Developer guide](developer-guide.md) · [Documentation index](../README.md#documentation)
+
 The application is a modular Flask monolith. `create_app` loads configuration,
 binds shared extensions, and registers routes and CLI commands. Importing the
 package does not create database tables or start a server.
@@ -48,3 +50,92 @@ rules live in static/css/components.css. Inline SVG icons are defined in the Jin
 icons macro, with no external icon or font dependency. Forms retain visible labels,
 keyboard focus states, and a skip-to-content link. Wide tables scroll within their
 own container on small screens.
+
+## System context
+
+Current scope. Solid arrows show application use; dotted arrows show physical
+business interactions outside the software boundary. Donors and recipients have
+no dedicated login or external API integration.
+
+```mermaid
+flowchart LR
+    Donor["Donor"] -.->|Supplies and receipt details| Operator["Food-bank operator"]
+    Operator -->|Records receipts, manages stock and orders| App["ACME Inventory System"]
+    App -->|Balances, alerts and exported reports| Operator
+    Operator -.->|Distributes supplies| Recipient["Recipient"]
+```
+
+## Runtime architecture
+
+A C4-style overview of current running parts. Browser JavaScript is served by Flask;
+there is no separately deployed frontend server. SQLite is an embedded database
+file, not a database service listening on a network port.
+
+```mermaid
+flowchart LR
+    Browser["Browser: HTML, CSS and ES modules"]
+    subgraph Application["Python process"]
+        Flask["Flask application: routes, services, Jinja and authentication"]
+        ORM["SQLAlchemy and embedded SQLite driver"]
+        Flask -->|Queries and transactions| ORM
+    end
+    Database[("SQLite database file")]
+    Uploads["Local upload directory"]
+    Browser -->|HTTP forms and JSON requests| Flask
+    Flask -->|HTML, assets, JSON and report downloads| Browser
+    ORM -->|Reads and writes| Database
+    Flask -->|Validated image writes and authenticated reads| Uploads
+```
+
+## Application modules
+
+Solid arrows below mean calls or rendering/data access, not network boundaries.
+All modules run inside the same application. Shared extensions provide database,
+password hashing and login integration.
+
+```mermaid
+flowchart TD
+    Factory["create_app: configure extensions, CSRF and routes"] --> Routes["routes: HTTP, login checks, input and responses"]
+    Routes -->|Render| Templates["templates: Jinja pages"]
+    Routes --> Inventory["services/inventory: products and receipts"]
+    Routes --> Orders["services/orders: preview and lifecycle"]
+    Routes --> Stock["services/stock: batches, adjustments and ledger"]
+    Routes --> ReadModels["services/overview and reports: summaries and exports"]
+    Routes --> Auth["auth/account routes and TOTP/image services"]
+    Inventory -->|Transactions and batch helpers| Stock
+    Orders -->|Transactions, availability and movements| Stock
+    ReadModels -->|Inventory and order reads| Inventory
+    ReadModels --> Orders
+    ReadModels --> Stock
+    Inventory --> Models["models and shared db session"]
+    Orders --> Models
+    Stock --> Models
+    ReadModels --> Models
+    Auth --> Models
+    CLI["cli and migrations: explicit database lifecycle"] --> Models
+```
+
+This is a responsibility map, not an exhaustive Python import graph. In particular,
+`Item.serialize()` delegates calculated balances to `stock_summary`; authentication
+routes also access user models directly. The factory creates the instance directory
+and may create a local signing secret, but database initialization is an explicit CLI
+operation. See [developer code map](developer-guide.md#where-to-change-a-feature).
+
+## Page navigation
+
+These are the operator's main entry points, not distinct services.
+
+```mermaid
+flowchart LR
+    Overview["Overview"] -->|Expiry alerts| Batches["Batches and stock"]
+    Overview -->|Low stock| Inventory["Inventory"]
+    Inventory -->|Select product link| Batches
+    Donations["Donations"] -->|Receipt saved| Inventory
+    Orders["Orders"] --> Create["Create order and preview"]
+    Create -->|Confirm and reserve| Orders
+    Batches -->|Review history| Movements["Movements"]
+    Inventory --> Reports["Reports"]
+    Orders --> Reports
+```
+
+For exact URLs and authentication requirements, see [development notes](development.md).

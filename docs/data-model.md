@@ -1,5 +1,7 @@
 # Inventory data model
 
+[Developer guide](developer-guide.md) · [Documentation index](../README.md#documentation)
+
 The application retains the original `user`, `item`, and `order` tables and adds
 normalized business tables through the versioned SQLite migration in migrations.py.
 
@@ -27,7 +29,7 @@ today. Low stock means available is strictly less than the configured minimum.
 
 A product's batch code is unique within that product. Batch constraints enforce
 0 <= reserved <= quantity. Products with batch or order history cannot be deleted.
-All mutations use a SQLite writer transaction acquired before reading balances;
+All stock mutations use a SQLite writer transaction acquired before reading balances;
 reservation, fulfillment, cancellation and ledger records commit or roll back together.
 This runtime and migration target SQLite; moving to another database requires a
 reviewed locking strategy and migration path.
@@ -50,3 +52,97 @@ To restore, stop the server and use SQLite backup from the selected .bak file in
 a separate restored database, then point ACME_DATABASE_URL at it and run the matching
 older application revision. Keep the current database until recovery is verified.
 Backups contain account data and belong in the private instance directory.
+
+## Entity relationships
+
+The diagram uses database table/column names. `order.orderdate` and
+`order.deliverydate` map to the Python attributes `ordered_on` and `delivered_on`.
+Only identifiers and selected business fields are shown; [model files](../src/acme_inventory/models)
+contain the complete definitions. Cardinalities below reflect declared relationships;
+services additionally require at least one line for new orders.
+
+```mermaid
+erDiagram
+    item ||--o{ stock_batch : has
+    item ||--o{ order_line : identifies
+    order ||--o{ order_line : contains
+    order_line ||--o{ order_allocation : allocates
+    stock_batch ||--o{ order_allocation : supplies
+    stock_batch ||--o{ stock_movement : records
+    order |o--o{ stock_movement : references
+    item {
+        int id PK
+        string sku UK
+        string name
+        string unit
+        string aliases
+        int minimum_stock
+        int quantity "compatibility total"
+    }
+    stock_batch {
+        int id PK
+        int item_id FK
+        string code "unique within product"
+        int quantity
+        int reserved
+        date received_on
+        date expires_on
+        string status
+        string source
+    }
+    order {
+        int id PK
+        date orderdate
+        date scheduled_on
+        date deliverydate
+        string status
+        string legacy_status
+        string recipient_name
+        string recipient_address
+    }
+    order_line {
+        int id PK
+        int order_id FK
+        int item_id FK
+        int quantity
+        string product_name "snapshot"
+        string unit "snapshot"
+    }
+    order_allocation {
+        int id PK
+        int line_id FK
+        int batch_id FK
+        int quantity
+    }
+    stock_movement {
+        int id PK
+        int batch_id FK
+        int order_id FK "optional"
+        string kind
+        int delta
+        int reserved_delta
+        int balance
+        int reserved_balance
+        string actor "text snapshot, not user FK"
+        string reason
+        datetime created_at
+    }
+```
+
+`user`, `operation` and `schema_version` are support tables outside this relationship
+view. The ledger's `actor` is text, not a foreign key to `user`. `operation.result_id`
+is an untyped result reference, not a declared foreign key to one particular table.
+Cancelled and fulfilled orders retain their allocation records for history; active
+reservations are the balances on batches, not the sum of all historical allocations.
+
+## Balance example
+
+For one product measured in bags, an eligible batch with 10 on hand and 3 reserved
+contributes 7 available. Another batch with 5 expired bags contributes 0 available.
+The product therefore shows 15 on hand, 3 reserved and 7 available. Summing quantities
+across different product units does not produce a meaningful inventory total.
+
+`expired` and `expiring` are date-derived quantities, not stored batch statuses.
+Expiry alerts include positive physical stock even if it is reserved or quarantined.
+The database check constraint protects batch quantity/reservation bounds; status,
+date and lifecycle rules are enforced in application services.
