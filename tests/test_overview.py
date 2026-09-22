@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 
 from acme_inventory.extensions import db
-from acme_inventory.models import Item
+from acme_inventory.models import Item, StockBatch
 from acme_inventory.services.overview import inventory_overview
 
 
@@ -15,11 +15,20 @@ def test_overview_counts_products_and_only_flags_stock_on_hand(app, authenticate
             ("Already expired", 2, -1),
             ("Empty expired product", 0, -2),
         ]:
+            item = Item(
+                name=name,
+                category="Food",
+                quantity=quantity,
+                received_on=today - timedelta(days=10),
+                expires_on=today + timedelta(days=days),
+            )
+            db.session.add(item)
             db.session.add(
-                Item(
-                    name=name,
-                    category="Food",
+                StockBatch(
+                    item=item,
+                    code=name,
                     quantity=quantity,
+                    reserved=0,
                     received_on=today - timedelta(days=10),
                     expires_on=today + timedelta(days=days),
                 )
@@ -28,7 +37,7 @@ def test_overview_counts_products_and_only_flags_stock_on_hand(app, authenticate
         summary = inventory_overview()
         assert summary["total"] == 5
         assert summary["in_stock"] == 4
-        assert summary["out_of_stock"] == 1
+        assert summary["out_of_stock"] == 2
         assert len(summary["expiring"]) == 2
         assert len(summary["expired"]) == 1
         assert summary["attention"][0].name == "Already expired"
